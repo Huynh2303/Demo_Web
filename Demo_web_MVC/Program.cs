@@ -1,7 +1,6 @@
 ﻿using Demo_web_MVC.Data;
 using Demo_web_MVC.Data.AppDatabase;
-using Demo_web_MVC.Sendmail;
-using Demo_web_MVC.Service;
+using Demo_web_MVC.Service.Sendemail;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +18,7 @@ builder.Services.AddDbContext<AppDatabase>(options =>
 });
 builder.Services.AddDistributedSqlServerCache(options =>
 {
-    options.ConnectionString =
+    options.ConnectionString =  
         builder.Configuration.GetConnectionString("DefaultConnection");
 
     options.SchemaName = "dbo";

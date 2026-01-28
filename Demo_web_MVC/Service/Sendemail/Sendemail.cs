@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Demo_web_MVC.Service;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace Demo_web_MVC.Sendmail
+namespace Demo_web_MVC.Service.Sendemail
 {
    public class Sendemail : IEmailServices
     {
@@ -52,7 +51,7 @@ namespace Demo_web_MVC.Sendmail
             try
             {
                 await smtp.SendAsync(email);
-                System.IO.Directory.CreateDirectory("mailsave");
+                Directory.CreateDirectory("mailsave");
                 var emailsavefile = string.Format(@"mailsave/{0}.eml", Guid.NewGuid());
                 await email.WriteToAsync(emailsavefile);
                 _logger.LogInformation("Lưu email vào file: " + emailsavefile);
@@ -60,7 +59,7 @@ namespace Demo_web_MVC.Sendmail
             catch (Exception ex)
             {
                 send = false;
-                System.IO.Directory.CreateDirectory("mailsave");
+                Directory.CreateDirectory("mailsave");
                 var emailsavefile = string.Format(@"mailsave/{0}.eml", Guid.NewGuid());
                 await email.WriteToAsync(emailsavefile);
                 _logger.LogInformation("Lưu email vào file: " + emailsavefile);

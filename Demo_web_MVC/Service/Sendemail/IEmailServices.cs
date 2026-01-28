@@ -1,4 +1,4 @@
-﻿namespace Demo_web_MVC.Service
+﻿namespace Demo_web_MVC.Service.Sendemail
 {
     public interface IEmailServices
     {
