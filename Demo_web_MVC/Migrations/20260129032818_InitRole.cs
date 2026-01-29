@@ -6,77 +6,67 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Demo_web_MVC.Migrations
 {
     /// <inheritdoc />
-    public partial class resetpassword : Migration
+    public partial class InitRole : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "FailedLoginCount",
-                table: "Users",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "LockoutUntil",
-                table: "Users",
-                type: "datetime2",
-                nullable: true);
+            migrationBuilder.DropColumn(
+                name: "CreatedAt",
+                table: "UserRoles");
 
             migrationBuilder.UpdateData(
                 table: "Roles",
                 keyColumn: "Id",
                 keyValue: 1,
                 column: "CreatedAt",
-                value: new DateTime(2026, 1, 27, 10, 13, 7, 169, DateTimeKind.Local).AddTicks(454));
+                value: new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3616));
 
             migrationBuilder.UpdateData(
                 table: "Roles",
                 keyColumn: "Id",
                 keyValue: 2,
                 column: "CreatedAt",
-                value: new DateTime(2026, 1, 27, 10, 13, 7, 169, DateTimeKind.Local).AddTicks(470));
+                value: new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3633));
 
             migrationBuilder.UpdateData(
                 table: "Roles",
                 keyColumn: "Id",
                 keyValue: 3,
                 column: "CreatedAt",
-                value: new DateTime(2026, 1, 27, 10, 13, 7, 169, DateTimeKind.Local).AddTicks(472));
+                value: new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3635));
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "FailedLoginCount",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "LockoutUntil",
-                table: "Users");
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedAt",
+                table: "UserRoles",
+                type: "datetime2",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.UpdateData(
                 table: "Roles",
                 keyColumn: "Id",
                 keyValue: 1,
                 column: "CreatedAt",
-                value: new DateTime(2026, 1, 26, 10, 52, 1, 754, DateTimeKind.Local).AddTicks(3090));
+                value: new DateTime(2026, 1, 29, 10, 20, 30, 536, DateTimeKind.Local).AddTicks(7067));
 
             migrationBuilder.UpdateData(
                 table: "Roles",
                 keyColumn: "Id",
                 keyValue: 2,
                 column: "CreatedAt",
-                value: new DateTime(2026, 1, 26, 10, 52, 1, 754, DateTimeKind.Local).AddTicks(3104));
+                value: new DateTime(2026, 1, 29, 10, 20, 30, 536, DateTimeKind.Local).AddTicks(7083));
 
             migrationBuilder.UpdateData(
                 table: "Roles",
                 keyColumn: "Id",
                 keyValue: 3,
                 column: "CreatedAt",
-                value: new DateTime(2026, 1, 26, 10, 52, 1, 754, DateTimeKind.Local).AddTicks(3105));
+                value: new DateTime(2026, 1, 29, 10, 20, 30, 536, DateTimeKind.Local).AddTicks(7085));
         }
     }
 }

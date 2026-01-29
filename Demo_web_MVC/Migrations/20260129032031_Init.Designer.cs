@@ -4,6 +4,7 @@ using Demo_web_MVC.Data.AppDatabase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Demo_web_MVC.Migrations
 {
     [DbContext(typeof(AppDatabase))]
-    partial class AppDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20260129032031_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,21 +90,21 @@ namespace Demo_web_MVC.Migrations
                         {
                             Id = 1,
                             Code = "USER",
-                            CreatedAt = new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3616),
+                            CreatedAt = new DateTime(2026, 1, 29, 10, 20, 30, 536, DateTimeKind.Local).AddTicks(7067),
                             Name = "Người dùng"
                         },
                         new
                         {
                             Id = 2,
                             Code = "ADMIN",
-                            CreatedAt = new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3633),
+                            CreatedAt = new DateTime(2026, 1, 29, 10, 20, 30, 536, DateTimeKind.Local).AddTicks(7083),
                             Name = "Quản trị"
                         },
                         new
                         {
                             Id = 3,
                             Code = "STAFF",
-                            CreatedAt = new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3635),
+                            CreatedAt = new DateTime(2026, 1, 29, 10, 20, 30, 536, DateTimeKind.Local).AddTicks(7085),
                             Name = "Nhân viên"
                         });
                 });
@@ -166,6 +169,9 @@ namespace Demo_web_MVC.Migrations
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("UserId", "RoleId");
 

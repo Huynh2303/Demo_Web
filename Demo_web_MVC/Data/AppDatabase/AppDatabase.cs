@@ -13,6 +13,8 @@ namespace Demo_web_MVC.Data.AppDatabase
         public DbSet<Demo_web_MVC.Models.Contact> Contacts { get; set; }
         public DbSet<Demo_web_MVC.Models.UserToken> userTokens { get; set; }
         public DbSet<Demo_web_MVC.Models.Role> Roles { get; set; }
+        public DbSet<Demo_web_MVC.Models.UserRole> UserRoles { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -29,10 +31,18 @@ namespace Demo_web_MVC.Data.AppDatabase
                 .HasIndex(x => x.Code)
                 .IsUnique();
 
-            modelBuilder.Entity<User>()
-                .HasOne(x => x.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(x => x.RoleId);
+            modelBuilder.Entity<UserRole>()
+                .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            modelBuilder.Entity<UserRole>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId);
+
+            modelBuilder.Entity<UserRole>()
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId);
 
             modelBuilder.Entity<UserToken>()
                 .HasOne(t => t.User)

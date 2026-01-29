@@ -50,39 +50,57 @@ namespace Demo_web_MVC.Controllers
                 ModelState.AddModelError("Username", "Tên đã tồn tại!");
                 return View(model);
             }
-
-            var hasher = new PasswordHasher<User>();
-            var roleId = await _context.Roles
-            .Where(r => r.Code == "USER")
-            .Select(r => r.Id)
-            .FirstAsync();
+            if (await _context.Users.AnyAsync(x => x.Email == model.Email))
+            {
+                ModelState.AddModelError("Email", "Email đã tồn tại!");
+                return View(model);
+            }
+            var role = await _context.Roles
+                .FirstAsync(r => r.Code == "USER");
             var user = new User
             {
                 Username = model.Username!,
                 Email = model.Email!,
                 FullName = model.FullName,
-                RoleId = roleId,
                 IsActive = false,
                 CreatedAt = DateTime.UtcNow
             };
-
+            var hasher = new PasswordHasher<User>();
             user.PasswordHash = hasher.HashPassword(user, model.Password!);
+            var token = new UserToken();    
+            //using var transaction = await _context.Database.BeginTransactionAsync();
+            //try
+            //{
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+                
+                var userRole = new UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = role.Id
+                };
+                _context.UserRoles.Add(userRole);
+                await _context.SaveChangesAsync();
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+                token = new UserToken
+                {
+                    UserId = user.Id,
+                    Token = Guid.NewGuid().ToString(),
+                    Type = TokenType.EmailConfirm,
+                    ExpiredAt = DateTime.UtcNow.AddHours(24),
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            var token = new UserToken
-            {
-                UserId = user.Id,
-                Token = Guid.NewGuid().ToString(),
-                Type = TokenType.EmailConfirm,
-                ExpiredAt = DateTime.UtcNow.AddHours(24),
-                CreatedAt = DateTime.UtcNow
-            };
+                _context.userTokens.Add(token);
 
-            _context.userTokens.Add(token);
-            await _context.SaveChangesAsync();
-
+                await _context.SaveChangesAsync();
+            //    await transaction.CommitAsync();
+            //}
+            //catch (Exception )
+            //{
+            //    await transaction.RollbackAsync();
+            //    _logger.LogError("Đăng ký không thành công");
+            //}
             _ = Task.Run(async () =>
             {
                 await _emailService.SendEmailAsync(
@@ -131,11 +149,15 @@ namespace Demo_web_MVC.Controllers
         {
             if (!ModelState.IsValid)
                 return View(model);
-
+            var input = model.UsernameOrEmail!.ToLower();
             // 1. Tìm user trong DB
-            var user = await _context.Users.FirstOrDefaultAsync(x =>
-                x.Username == model.UsernameOrEmail ||
-                x.Email == model.UsernameOrEmail);
+            var user = await _context.Users
+                 .Include(u => u.UserRoles)
+                     .ThenInclude(ur => ur.Role)
+                 .FirstOrDefaultAsync(x =>
+                     x.Username == input ||
+                     x.Email == input);
+
 
             if (user == null)
             {
@@ -156,7 +178,7 @@ namespace Demo_web_MVC.Controllers
                     $"Tài khoản bị khóa đến {user.LockoutUntil:HH:mm:ss}");
                 return View("Lockout");
             }
-
+            
             // 3. Verify password
             var hasher = new PasswordHasher<User>();
             var result = hasher.VerifyHashedPassword(
@@ -176,10 +198,10 @@ namespace Demo_web_MVC.Controllers
                     user.LockoutUntil = DateTime.UtcNow.AddMinutes(5);
                     user.FailedLoginCount = 0;
                 }
-
                 await _context.SaveChangesAsync();
 
-                if (user.LockoutUntil != null)
+
+                if (user.LockoutUntil != null && user.LockoutUntil > DateTime.UtcNow)
                     return View("Lockout");
 
                 ModelState.AddModelError("", "Sai tên đăng nhập hoặc mật khẩu");
@@ -189,16 +211,29 @@ namespace Demo_web_MVC.Controllers
             // 5. Đăng nhập thành công → reset lockout
             user.FailedLoginCount = 0;
             user.LockoutUntil = null;
+
             await _context.SaveChangesAsync();
 
+            var roleCode = user.UserRoles
+                   .Select(ur => ur.Role.Code)
+                   .FirstOrDefault();
+            if (roleCode == null)
+            {
+                ModelState.AddModelError("", "Tài khoản chưa được phân quyền");
+                return View(model);
+            }
             // 6. Sign in
             var claims = new List<Claim>
     {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim("FullName", user.FullName ?? ""),
-                //new Claim(ClaimTypes.Role, user.Role.Code)
+                //new Claim(ClaimTypes.Role, roleCode)
             };
+            foreach (var role in user.UserRoles.Select(ur => ur.Role.Code))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var identity = new ClaimsIdentity(
                 claims,

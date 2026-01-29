@@ -25,12 +25,10 @@ namespace Demo_web_MVC.Models
 
         public DateTime? EmailConfirmedAt { get; set; }
 
-        // FK Role
-        public int RoleId { get; set; }
-        public Role Role { get; set; } = null!;
 
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }    
 
         // Navigation
         public ICollection<UserToken> Tokens { get; set; } = new List<UserToken>();

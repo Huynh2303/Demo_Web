@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Demo_web_MVC.Migrations
 {
     [DbContext(typeof(AppDatabase))]
-    [Migration("20260127031308_resetpassword")]
-    partial class resetpassword
+    [Migration("20260129032818_InitRole")]
+    partial class InitRole
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,21 +90,21 @@ namespace Demo_web_MVC.Migrations
                         {
                             Id = 1,
                             Code = "USER",
-                            CreatedAt = new DateTime(2026, 1, 27, 10, 13, 7, 169, DateTimeKind.Local).AddTicks(454),
+                            CreatedAt = new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3616),
                             Name = "Người dùng"
                         },
                         new
                         {
                             Id = 2,
                             Code = "ADMIN",
-                            CreatedAt = new DateTime(2026, 1, 27, 10, 13, 7, 169, DateTimeKind.Local).AddTicks(470),
+                            CreatedAt = new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3633),
                             Name = "Quản trị"
                         },
                         new
                         {
                             Id = 3,
                             Code = "STAFF",
-                            CreatedAt = new DateTime(2026, 1, 27, 10, 13, 7, 169, DateTimeKind.Local).AddTicks(472),
+                            CreatedAt = new DateTime(2026, 1, 29, 10, 28, 18, 111, DateTimeKind.Local).AddTicks(3635),
                             Name = "Nhân viên"
                         });
                 });
@@ -143,9 +143,6 @@ namespace Demo_web_MVC.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -159,12 +156,25 @@ namespace Demo_web_MVC.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.HasIndex("RoleId");
-
                     b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Demo_web_MVC.Models.UserRole", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("Demo_web_MVC.Models.UserToken", b =>
@@ -207,15 +217,23 @@ namespace Demo_web_MVC.Migrations
                     b.ToTable("userTokens");
                 });
 
-            modelBuilder.Entity("Demo_web_MVC.Models.User", b =>
+            modelBuilder.Entity("Demo_web_MVC.Models.UserRole", b =>
                 {
                     b.HasOne("Demo_web_MVC.Models.Role", "Role")
-                        .WithMany("Users")
+                        .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Demo_web_MVC.Models.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Demo_web_MVC.Models.UserToken", b =>
@@ -231,12 +249,14 @@ namespace Demo_web_MVC.Migrations
 
             modelBuilder.Entity("Demo_web_MVC.Models.Role", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("Demo_web_MVC.Models.User", b =>
                 {
                     b.Navigation("Tokens");
+
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }
