@@ -224,7 +224,7 @@ namespace Demo_web_MVC.Controllers
             }
             // 6. Sign in
             var claims = new List<Claim>
-    {
+            {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim("FullName", user.FullName ?? ""),
@@ -234,7 +234,7 @@ namespace Demo_web_MVC.Controllers
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-
+                
             var identity = new ClaimsIdentity(
                 claims,
                 CookieAuthenticationDefaults.AuthenticationScheme
