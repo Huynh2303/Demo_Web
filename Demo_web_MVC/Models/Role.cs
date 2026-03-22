@@ -1,24 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
-namespace Demo_web_MVC.Models
+namespace Demo_web_MVC.Models;
+
+public partial class Role
 {
-    public class Role
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        public string Code { get; set; } = null!; // ADMIN, USER, STAFF
+    public string Code { get; set; } = null!;
 
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
-        public string? Description { get; set; }
-          
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public string? Description { get; set; }
 
-        // Navigation
-        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
-    }
+    public DateTime CreatedAt { get; set; }
+
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }
