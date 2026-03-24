@@ -13,6 +13,7 @@
         public string? Brand { get; set; }
 
         public DateTime CreatedAt { get; set; }
+        public List<ProductVariantsViewModel>? Variants { get; set; }
 
     }
 }
