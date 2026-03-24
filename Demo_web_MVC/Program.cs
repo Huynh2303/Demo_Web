@@ -5,11 +5,17 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Demo_web_MVC.Repository.Product;
 using NETCore.MailKit.Core;
+using Demo_web_MVC.Service.Product;
+using Demo_web_MVC.Repository;
+using Demo_web_MVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped< IProductService,ProductService>();
 builder.Services.AddScoped<IEmailServices, Sendemail>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDatabase>(options =>

@@ -1,28 +1,35 @@
-﻿using Demo_web_MVC.Repository.Product;
+﻿using Demo_web_MVC.Models.ViewModel.Product;
+using Demo_web_MVC.Repository;
+using Demo_web_MVC.Repository.Product;
 namespace Demo_web_MVC.Service.Product
 {
-    public class ProductService
+    public class ProductService : IProductService
     {
-        private readonly ProductRepository _productRepository;
-        public ProductService(ProductRepository productRepository)
+        private readonly IProductRepository _productRepository;
+        public ProductService(IProductRepository productRepository)
         {
             _productRepository = productRepository;
-        }
-        public Task<object> Details(int? id)
+        }       
+        public async Task<ProductViewModel> details(int id)    
         {
-            throw new NotImplementedException();
-            if (id == null)
-            {
-                return Task.FromResult<object>(new { success = false, message = "Không có sản phẩm" });
-            }
-            var product = _productRepository.GetAllAsync().Result.FirstOrDefault(p => p.Id == id);
-            if (product == null)
-            {
-                return Task.FromResult<object>(new { success = false, message = "Không có sản phẩm" });
-            }
-            {
-
-            }
+            
+            return await _productRepository.DetailsAsnyc(id);
+        }
+        public async Task<ProductViewModel> creat(ProductViewModel product)
+        {
+            return await _productRepository.AddAsnyc(product);
+        }
+        public async Task<ProductViewModel> update(int id, ProductViewModel product)
+        {
+            return await _productRepository.UpdateAsync(id, product);
+        }
+        public async Task<bool> delete(int id)
+        {
+            return await _productRepository.DeleteAsync(id);
+        }
+        public async Task<List<ProductViewModel>> getAll()
+        {
+            return await _productRepository.GetAllAsync();
         }
     }
 }

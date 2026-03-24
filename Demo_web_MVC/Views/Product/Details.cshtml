@@ -1,0 +1,16 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Product.ProductViewModel
+
+@{
+   ViewData["Title"] = "Chi tiết sản phẩm";
+}
+
+<h1>Chi tiết sản phẩm</h1>
+
+<div>
+    <h2>@Model.Name</h2>
+    <p>@Model.Description</p>
+    @* <p>Giá: @Model.Price</p> *@
+    @* <p>Danh mục: @Model.CategoryName</p> *@
+
+    <a asp-action="Details" asp-controller="Product" >Quay lại danh sách sản phẩm</a>
+</div>
