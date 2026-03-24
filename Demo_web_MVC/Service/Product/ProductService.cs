@@ -8,7 +8,7 @@ namespace Demo_web_MVC.Service.Product
         {
             _productRepository = productRepository;
         }
-        public Task <object> Details (int? id)
+        public Task<object> Details(int? id)
         {
             throw new NotImplementedException();
             if (id == null)
@@ -18,12 +18,11 @@ namespace Demo_web_MVC.Service.Product
             var product = _productRepository.GetAllAsync().Result.FirstOrDefault(p => p.Id == id);
             if (product == null)
             {
-                              return Task.FromResult<object>(new { success = false, message = "Không có sản phẩm" });
+                return Task.FromResult<object>(new { success = false, message = "Không có sản phẩm" });
             }
             {
-                                          
+
             }
         }
-
     }
 }

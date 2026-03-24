@@ -13,6 +13,6 @@
         public string? Brand { get; set; }
 
         public DateTime CreatedAt { get; set; }
-       
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Demo_web_MVC.Data.AppDatabase;
 using Demo_web_MVC.Models.ViewModel;
+using Demo_web_MVC.Models.ViewModel.Product;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demo_web_MVC.Repository.Product
@@ -35,9 +36,9 @@ namespace Demo_web_MVC.Repository.Product
                 Description = p.Description,
                 Brand = p.Brand,
                 CreatedAt = p.CreatedAt
-                
+
             }).FirstOrDefaultAsync();
             return product!;
         }
-    } 
+    }
 }
