@@ -1,19 +1,24 @@
 ﻿using Demo_web_MVC.Data;
 using Demo_web_MVC.Data.AppDatabase;
+using Demo_web_MVC.Repository;
+using Demo_web_MVC.Repository.Category;
+using Demo_web_MVC.Repository.Product;
+using Demo_web_MVC.Service;
+using Demo_web_MVC.Service.Category;
+using Demo_web_MVC.Service.Product;
 using Demo_web_MVC.Service.Sendemail;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Demo_web_MVC.Repository.Product;
+using Microsoft.Extensions.FileProviders;
 using NETCore.MailKit.Core;
-using Demo_web_MVC.Service.Product;
-using Demo_web_MVC.Repository;
-using Demo_web_MVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddScoped< ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped< IProductService,ProductService>();
 builder.Services.AddScoped<IEmailServices, Sendemail>();
@@ -59,11 +64,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
+    RequestPath = "/uploads"
+});
 app.UseSession();
-
 app.UseRouting();
-
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 

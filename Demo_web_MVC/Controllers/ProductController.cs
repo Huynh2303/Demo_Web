@@ -1,4 +1,8 @@
-﻿using Demo_web_MVC.Service;
+﻿using Demo_web_MVC.Models;
+using Demo_web_MVC.Models.ViewModel.Category;
+using Demo_web_MVC.Models.ViewModel.Product;
+using Demo_web_MVC.Service;
+using Demo_web_MVC.Service.Category;
 using Demo_web_MVC.Service.Product;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -8,9 +12,11 @@ namespace Demo_web_MVC.Controllers
     public class ProductController : Controller
     {
         public readonly IProductService _productService;
-        public ProductController(IProductService productService)
+        public readonly ICategoryService _categoryService;
+        public ProductController(IProductService productService, ICategoryService categoryService)
         {
             _productService = productService;
+            _categoryService = categoryService;
         }
         public async Task<IActionResult> Index()
         {
@@ -21,7 +27,7 @@ namespace Demo_web_MVC.Controllers
             return View();
         }
         [HttpGet]
-        public async Task<ActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             // Call the service to get product details by id
             // var productDetails = await _productService.details(id);
@@ -36,6 +42,83 @@ namespace Demo_web_MVC.Controllers
                 return NotFound("không tìm thấy sản phẩm");
             }
             return View(productDetails);
+        }
+        public async Task<IActionResult> Create()
+        {
+            // Lấy danh sách các danh mục từ cơ sở dữ liệu
+            var categories = await _categoryService.GetAllCategories();
+            var categoryViewModels = categories.Select(c => new CategoryViewModel
+            {
+                Id = c.Id,
+                Name = c.Name
+            }).ToList();
+
+            // Tạo ProductViewModel và gán danh sách danh mục vào Categories
+            var productViewModel = new ProductViewModel
+            {
+                Categories = categoryViewModels  // Truyền vào thuộc tính Categories
+            };
+            return View(productViewModel);
+        }
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> Create(ProductViewModel productVM, IFormFile[] imageUrl)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Kiểm tra nếu người dùng tải lên hình ảnh
+                    if (imageUrl != null && imageUrl.Length > 0)
+                    {
+                        var uploadsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
+                        if (!Directory.Exists(uploadsDirectory))
+                        {
+                            Directory.CreateDirectory(uploadsDirectory); // Tạo thư mục nếu chưa có
+                        }
+
+                        var fileNames = new List<string>();
+                        foreach (var file in imageUrl)
+                        {
+                            var fileName = Path.GetFileName(file.FileName); // Lấy tên tệp
+                            var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                            // Lưu hình ảnh vào thư mục uploads
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream);
+                            }
+
+                            // Thêm tên file vào danh sách
+                            fileNames.Add($"/uploads/products/{fileName}");
+                        }
+
+                        // Gán đường dẫn của các hình ảnh vào model
+                        productVM.imageUrl= fileNames;
+                    }
+
+                    // Gọi phương thức Create từ service để tạo sản phẩm
+                    var result = await _productService.creat(productVM);
+
+                    if (result == null)
+                    {
+                        // Thêm thông báo lỗi chi tiết
+                        ModelState.AddModelError("", "Không thể tạo sản phẩm, vui lòng thử lại.");
+                    }
+                    else
+                    {
+                        // Chuyển hướng nếu tạo sản phẩm thành công
+                        return RedirectToAction("Index");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Ghi log hoặc xử lý lỗi nếu có ngoại lệ xảy ra
+                    ModelState.AddModelError("", $"Có lỗi xảy ra: {ex.Message}");
+                }
+            }
+
+            return View(productVM);
         }
     }
 }

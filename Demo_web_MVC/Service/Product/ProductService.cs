@@ -17,7 +17,16 @@ namespace Demo_web_MVC.Service.Product
         }
         public async Task<ProductViewModel> creat(ProductViewModel product)
         {
-            return await _productRepository.AddAsnyc(product);
+            try
+            {
+                // Gọi phương thức AddAsnyc từ repository để thêm sản phẩm
+                return await _productRepository.AddAsnyc(product);
+            }
+            catch (Exception ex)
+            {
+                // Ghi log hoặc xử lý lỗi tùy theo yêu cầu
+                throw new Exception("Có lỗi khi tạo sản phẩm", ex);
+            }
         }
         public async Task<ProductViewModel> update(int id, ProductViewModel product)
         {

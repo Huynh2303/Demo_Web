@@ -7,10 +7,21 @@
 <h1>Chi tiết sản phẩm</h1>
 
 <div>
+    <img src="@Model.imageUrl.FirstOrDefault()" alt="@Model.Name" style="width:100px;height:auto;" />
     <h2>@Model.Name</h2>
     <p>@Model.Description</p>
-    @* <p>Giá: @Model.Price</p> *@
-    @* <p>Danh mục: @Model.CategoryName</p> *@
+    <h3>Biến thể sản phẩm:</h3>
+    @foreach (var variant in Model.Variants!)
+    {
+        <div>
+            <h4>@variant.Size - @variant.Color</h4>
+            @foreach (var img in variant.ImageUrlsVariants)
+            {
+                 <p>@img</p>
+                <img src="@img" alt="Variant Image" style="width:100px;height:auto;" />
+            }
+        </div>
+    }
 
-    <a asp-action="Details" asp-controller="Product" >Quay lại danh sách sản phẩm</a>
+    <a asp-action="Index" asp-controller="Product" >Quay lại danh sách sản phẩm</a>
 </div>

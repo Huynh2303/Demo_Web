@@ -1,4 +1,6 @@
-﻿namespace Demo_web_MVC.Models.ViewModel.Product
+﻿using Demo_web_MVC.Models.ViewModel.Category;
+
+namespace Demo_web_MVC.Models.ViewModel.Product
 {
     public class ProductViewModel
     {
@@ -12,8 +14,11 @@
 
         public string? Brand { get; set; }
 
+        
         public DateTime CreatedAt { get; set; }
         public List<ProductVariantsViewModel>? Variants { get; set; }
+        public List<string> imageUrl { get; set; } = new List<string>();
+        public List <CategoryViewModel>? Categories { get; set; }
 
     }
 }

@@ -16,14 +16,15 @@ namespace Demo_web_MVC.Repository.Product
 
         public async Task<List<ProductViewModel>> GetAllAsync()
         {
-            var products = await _context.Products.AsNoTracking().Select(p => new ProductViewModel
+            var products = await _context.Products.AsNoTracking().Include(p=>p.ProductImages).Select(p => new ProductViewModel
             {
                 Id = p.Id,
                 CategoryId = p.CategoryId,
                 Name = p.Name,
                 Description = p.Description,
                 Brand = p.Brand,
-                CreatedAt = p.CreatedAt
+                CreatedAt = p.CreatedAt,
+                imageUrl = p.ProductImages.Select(pi => pi.Url).ToList() ?? new List<string>()
             }).ToListAsync();
             return products;
         }
@@ -50,7 +51,20 @@ namespace Demo_web_MVC.Repository.Product
                 Name = p.Name,
                 Description = p.Description,
                 Brand = p.Brand,
-                CreatedAt = p.CreatedAt
+                CreatedAt = p.CreatedAt,
+                imageUrl= p.ProductImages.Select(pi => pi.Url).ToList() ?? new List<string>(),
+                Variants = p.ProductVariants
+                .Select(v => new ProductVariantsViewModel
+                {
+                    Id = v.Id,
+                    ProductId = v.ProductId,
+                    Size = v.Size,
+                    Color = v.Color,
+                    Price = v.Price,
+                    Stock = v.Stock,
+                    ImageUrlsVariants = v.ProductVariantImages.Select(pvi => pvi.Url).ToList() ?? new List<string>(),
+                })
+                .ToList()
             }).FirstOrDefaultAsync();
             return product!;
         }
@@ -62,7 +76,20 @@ namespace Demo_web_MVC.Repository.Product
                 Name = product.Name,    
                 Description = product.Description,
                 Brand = product.Brand,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                ProductImages = product.imageUrl?.Select(url => new ProductImage
+                {
+                    Url = $"/uploads/products/{url.Trim()}"  // Thêm tiền tố vào mỗi URL
+                })
+.ToList() ?? new List<ProductImage>(),
+                ProductVariants = product.Variants?.Select(v => new ProductVariant
+                {
+                    Size = v.Size,
+                    Color = v.Color,
+                    Price = v.Price,
+                    Stock = v.Stock,
+                    ProductVariantImages = v.ImageUrlsVariants?.Select(url => new ProductVariantImage { Url = url }).ToList() ?? new List<ProductVariantImage>()
+                }).ToList() ?? new List<ProductVariant>()
             };
             _context.Products.Add(newProduct);
             await _context.SaveChangesAsync();

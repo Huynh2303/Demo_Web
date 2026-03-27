@@ -35,6 +35,9 @@ namespace Demo_web_MVC.Data.AppDatabase
         public virtual DbSet<Product> Products { get; set; }
 
         public virtual DbSet<ProductVariant> ProductVariants { get; set; }
+        public virtual DbSet<ProductImage> ProductImages { get; set; }
+        public virtual DbSet<ProductVariantImage > ProductVariantImages { get; set; }
+        public virtual DbSet<UserImage> UserImages  { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -308,7 +311,67 @@ namespace Demo_web_MVC.Data.AppDatabase
                     .HasConstraintName("fk_variants_product");
             });
 
-            
+            modelBuilder.Entity<ProductImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasIndex(e => e.ProductId, "idx_productimages_productid");
+
+                entity.Property(e => e.Url)
+                    .IsRequired()
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SortOrder)
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.ProductImages)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_productimages_product");
+            });
+
+            modelBuilder.Entity<ProductVariantImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasIndex(e => e.VariantId, "idx_variantimages_variantid");
+
+                entity.Property(e => e.Url)
+                    .IsRequired()
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SortOrder)
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Variant)
+                    .WithMany(v => v.ProductVariantImages)
+                    .HasForeignKey(d => d.VariantId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_variantimages_variant");
+            });
+
+            modelBuilder.Entity<UserImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasIndex(e => e.UserId, "uq_userimages_userid")
+                    .IsUnique();
+
+                entity.Property(e => e.Url)
+                    .IsRequired()
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.User)
+                    .WithOne(u => u.UserImage)
+                    .HasForeignKey<UserImage>(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("fk_userimages_user");
+            });
+
         }
 
 
