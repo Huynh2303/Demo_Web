@@ -43,9 +43,13 @@
             </td>
            
             <td>
-               
+                <a asp-action="Create" asp-controller="Product">Create</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                
+                 <form asp-action="DeleteConfirmed" asp-controller="Product" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form> |
             </td>
         </tr>
 }

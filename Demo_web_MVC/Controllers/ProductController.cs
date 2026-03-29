@@ -61,7 +61,6 @@ namespace Demo_web_MVC.Controllers
             return View(productViewModel);
         }
         [HttpPost]
-        [HttpPost]
         public async Task<IActionResult> Create(ProductViewModel productVM, IFormFile[] imageUrl)
         {
             if (ModelState.IsValid)
@@ -80,21 +79,22 @@ namespace Demo_web_MVC.Controllers
                         var fileNames = new List<string>();
                         foreach (var file in imageUrl)
                         {
-                            var fileName = Path.GetFileName(file.FileName); // Lấy tên tệp
-                            var filePath = Path.Combine(uploadsDirectory, fileName);
-
-                            // Lưu hình ảnh vào thư mục uploads
-                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            if (file.Length > 0)
                             {
-                                await file.CopyToAsync(stream);
+                                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                                var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                                using (var stream = new FileStream(filePath, FileMode.Create))
+                                {
+                                    await file.CopyToAsync(stream);
+                                }
+
+                                fileNames.Add(fileName); // Đường dẫn tương đối đúng
                             }
-
-                            // Thêm tên file vào danh sách
-                            fileNames.Add($"/uploads/products/{fileName}");
                         }
-
                         // Gán đường dẫn của các hình ảnh vào model
                         productVM.imageUrl= fileNames;
+
                     }
 
                     // Gọi phương thức Create từ service để tạo sản phẩm
@@ -119,6 +119,32 @@ namespace Demo_web_MVC.Controllers
             }
 
             return View(productVM);
+        }
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            if (id <= 0)
+            {
+                return NotFound("không có id ");
+            }
+            try
+            {
+               
+                var result = await _productService.delete(id);
+                if (!result)
+                {
+                    TempData["Error"] = "Không tìm thấy sản phẩm để xóa.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                // Ghi log hoặc xử lý lỗi nếu có ngoại lệ xảy ra
+                ModelState.AddModelError("", $"Có lỗi xảy ra: {ex.Message}");
+                Console.WriteLine($"Error deleting product: {ex.Message}");
+                return RedirectToAction("Index");
+            }
         }
     }
 }

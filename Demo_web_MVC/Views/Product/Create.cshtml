@@ -6,7 +6,7 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Tên sản phẩm</label>
         <input asp-for="Name" class="form-control" />
@@ -40,7 +40,7 @@
 
     <div class="form-group">
         <label asp-for="imageUrl" class="control-label">Hình ảnh sản phẩm</label>
-        <input asp-for="imageUrl" type="file" class="form-control" multiple />
+        <input asp-for="imageUrl" type="file" class="form-control"  />
         <span asp-validation-for="imageUrl" class="text-danger"></span>
     </div>
 

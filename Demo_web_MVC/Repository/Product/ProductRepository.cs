@@ -9,9 +9,11 @@ namespace Demo_web_MVC.Repository.Product
     public class ProductRepository : IProductRepository
     {
         private readonly AppDatabase _context;
-        public ProductRepository(AppDatabase context)
+        public readonly ILogger<ProductRepository> _logger;
+        public ProductRepository(AppDatabase context, ILogger<ProductRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<List<ProductViewModel>> GetAllAsync()
@@ -156,21 +158,35 @@ namespace Demo_web_MVC.Repository.Product
         }
         public async Task<bool> DeleteAsync(int id)
         {
-            var product = await _context.Products
-                .Include(p => p.ProductVariants)
+            try
+            {
+                var product = await _context.Products
+                .Include(p => p.ProductVariants).Include(p => p.ProductImages).Include(p=>p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (product == null)
-                throw new Exception("Product not found");
+                if (product == null)
+                   return false;
+                if (product.ProductImages != null && product.ProductImages.Any())
+                {
+                    _context.ProductImages.RemoveRange(product.ProductImages);
+                }
+                // Xóa variants trước (explicit)
+                _context.ProductVariants.RemoveRange(product.ProductVariants);
 
-            // Xóa variants trước (explicit)
-            _context.ProductVariants.RemoveRange(product.ProductVariants);
+                // Sau đó xóa product
+                _context.Products.Remove(product);
 
-            // Sau đó xóa product
-            _context.Products.Remove(product);
-
-            await _context.SaveChangesAsync();
-            return true;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                
+                // Log lỗi nếu cần
+                Console.WriteLine($"Error deleting product: {ex.Message}");
+                _logger.LogError(ex, "Error deleting product with id {ProductId}", id);
+                return false;
+            }
         }
     }
 }
