@@ -12,6 +12,7 @@ namespace Demo_web_MVC.Repository
         Task<ProductViewModel> UpdateAsync(int id,ProductViewModel product);
         Task<bool> DeleteAsync(int id);
         Task<ProductViewModel> DetailsAsnyc(int id);
+        
 
     }
 }

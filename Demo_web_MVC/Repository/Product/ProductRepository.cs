@@ -1,6 +1,7 @@
 ﻿using Demo_web_MVC.Data.AppDatabase;
 using Demo_web_MVC.Models;
 using Demo_web_MVC.Models.ViewModel;
+using Demo_web_MVC.Models.ViewModel.Category;
 using Demo_web_MVC.Models.ViewModel.Product;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,43 +72,51 @@ namespace Demo_web_MVC.Repository.Product
             return product!;
         }
         public async Task<ProductViewModel> AddAsnyc(ProductViewModel product)
-        {
-            var newProduct = new Models.Product
             {
-                CategoryId = product.CategoryId,
-                Name = product.Name,    
-                Description = product.Description,
-                Brand = product.Brand,
-                CreatedAt = DateTime.Now,
-                ProductImages = product.imageUrl?.Select(url => new ProductImage
+                var newProduct = new Models.Product
                 {
-                    Url = $"/uploads/products/{url.Trim()}"  // Thêm tiền tố vào mỗi URL
-                })
-.ToList() ?? new List<ProductImage>(),
-                ProductVariants = product.Variants?.Select(v => new ProductVariant
-                {
-                    Size = v.Size,
-                    Color = v.Color,
-                    Price = v.Price,
-                    Stock = v.Stock,
-                    ProductVariantImages = v.ImageUrlsVariants?.Select(url => new ProductVariantImage { Url = url }).ToList() ?? new List<ProductVariantImage>()
-                }).ToList() ?? new List<ProductVariant>()
-            };
-            _context.Products.Add(newProduct);
-            await _context.SaveChangesAsync();
-            product.Id = newProduct.Id;
-            return product;
-        }
+                    CategoryId = product.CategoryId,
+                    Name = product.Name,    
+                    Description = product.Description,
+                    Brand = product.Brand,
+                    CreatedAt = DateTime.Now,
+                    ProductImages = product.imageUrl?.Select(url => new ProductImage
+                    {
+                        Url = $"/uploads/products/{url.Trim()}"  // Thêm tiền tố vào mỗi URL
+                    }).ToList() ?? new List<ProductImage>(),
+                    ProductVariants = product.Variants?.Select(v => new ProductVariant
+                    {
+                        Size = v.Size,
+                        Color = v.Color,
+                        Price = v.Price,
+                        Stock = v.Stock,
+                        ProductVariantImages = v.ImageUrlsVariants?.Select(url => new ProductVariantImage { Url = url }).ToList() ?? new List<ProductVariantImage>()
+                    }).ToList() ?? new List<ProductVariant>()
+                };
+            
+                _context.Products.Add(newProduct);
+                await _context.SaveChangesAsync();
+                product.Id = newProduct.Id;
+                return product;
+            }
         public async Task<ProductViewModel> UpdateAsync(int id, ProductViewModel model)
         {
             var product = await _context.Products
                 .Include(p => p.ProductVariants)
+                .ThenInclude(v => v.ProductVariantImages)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
                 throw new Exception("Product not found");
 
-            // Update thông tin chính
+            var categoryExists = await _context.Categories
+                .AnyAsync(c => c.Id == model.CategoryId);
+
+            if (!categoryExists)
+                throw new Exception("Category not found");
+
+            // Update thông tin product
             product.CategoryId = model.CategoryId;
             product.Name = model.Name;
             product.Description = model.Description;
@@ -115,34 +124,43 @@ namespace Demo_web_MVC.Repository.Product
 
             var inputVariants = model.Variants ?? new List<ProductVariantsViewModel>();
 
-            // ===== DELETE =====
+            // Các variant cần xóa
             var toDelete = product.ProductVariants
                 .Where(v => !inputVariants.Any(iv => iv.Id == v.Id))
                 .ToList();
 
-            _context.ProductVariants.RemoveRange(toDelete);
+            foreach (var variant in toDelete)
+            {
+                // Nếu có ảnh biến thể thì xóa trước
+                if (variant.ProductVariantImages != null && variant.ProductVariantImages.Any())
+                {
+                    _context.ProductVariantImages.RemoveRange(variant.ProductVariantImages);
+                }
 
-            // ===== UPDATE + ADD =====
-            foreach (var variant in inputVariants)
+                _context.ProductVariants.Remove(variant);
+            }
+
+            // Update hoặc Add
+            foreach (var variantVm in inputVariants)
             {
                 var existing = product.ProductVariants
-                    .FirstOrDefault(v => v.Id == variant.Id);
+                    .FirstOrDefault(v => v.Id == variantVm.Id);
 
                 if (existing != null)
                 {
-                    existing.Size = variant.Size;
-                    existing.Color = variant.Color;
-                    existing.Price = variant.Price;
-                    existing.Stock = variant.Stock;
+                    existing.Size = variantVm.Size;
+                    existing.Color = variantVm.Color;
+                    existing.Price = variantVm.Price;
+                    existing.Stock = variantVm.Stock;
                 }
                 else
                 {
                     product.ProductVariants.Add(new ProductVariant
                     {
-                        Size = variant.Size,
-                        Color = variant.Color,
-                        Price = variant.Price,
-                        Stock = variant.Stock
+                        Size = variantVm.Size,
+                        Color = variantVm.Color,
+                        Price = variantVm.Price,
+                        Stock = variantVm.Stock
                     });
                 }
             }
@@ -152,9 +170,11 @@ namespace Demo_web_MVC.Repository.Product
             return new ProductViewModel
             {
                 Id = product.Id,
-                Name = product.Name
+                CategoryId = product.CategoryId,
+                Name = product.Name,
+                Description = product.Description,
+                Brand = product.Brand
             };
-
         }
         public async Task<bool> DeleteAsync(int id)
         {
@@ -188,5 +208,6 @@ namespace Demo_web_MVC.Repository.Product
                 return false;
             }
         }
+
     }
 }

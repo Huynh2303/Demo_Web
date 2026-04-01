@@ -20,5 +20,6 @@ namespace Demo_web_MVC.Models.ViewModel.Product
         public List<string> imageUrl { get; set; } = new List<string>();
         public List <CategoryViewModel>? Categories { get; set; }
 
+
     }
 }

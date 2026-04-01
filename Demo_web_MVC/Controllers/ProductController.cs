@@ -20,7 +20,7 @@ namespace Demo_web_MVC.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            return View( await _productService.getAll());
+            return View(await _productService.getAll());
         }
         public IActionResult Details(int id)
         {
@@ -32,7 +32,7 @@ namespace Demo_web_MVC.Controllers
             // Call the service to get product details by id
             // var productDetails = await _productService.details(id);
             // return View(productDetails);
-            if ( id  == null)
+            if (id == null)
             {
                 return NotFound("không có id ");
             }
@@ -93,7 +93,7 @@ namespace Demo_web_MVC.Controllers
                             }
                         }
                         // Gán đường dẫn của các hình ảnh vào model
-                        productVM.imageUrl= fileNames;
+                        productVM.imageUrl = fileNames;
 
                     }
 
@@ -129,7 +129,7 @@ namespace Demo_web_MVC.Controllers
             }
             try
             {
-               
+
                 var result = await _productService.delete(id);
                 if (!result)
                 {
@@ -145,6 +145,29 @@ namespace Demo_web_MVC.Controllers
                 Console.WriteLine($"Error deleting product: {ex.Message}");
                 return RedirectToAction("Index");
             }
+        }
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var product = await _productService.getbyid(id);
+            if (product == null)
+                return NotFound();
+
+            product.Categories = await _categoryService.GetAllCategories();
+            return View(product);
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, ProductViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Categories = await _categoryService.GetAllCategories();
+                return View(model);
+            }
+
+            await _productService.update(id, model);
+            return RedirectToAction("Index");
         }
     }
 }

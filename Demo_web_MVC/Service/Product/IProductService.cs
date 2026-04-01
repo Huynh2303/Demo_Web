@@ -11,5 +11,6 @@ namespace Demo_web_MVC.Service
         //Task < ProductViewModel> getById(int id);
         Task < ProductViewModel> details (int id);        
         Task< List<ProductViewModel>> getAll();
+        Task<ProductViewModel> getbyid(int id);
     }                   
 }
