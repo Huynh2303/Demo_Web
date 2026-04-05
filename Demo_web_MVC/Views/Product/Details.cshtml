@@ -1,27 +1,127 @@
 ﻿@model Demo_web_MVC.Models.ViewModel.Product.ProductViewModel
+@using System.Linq
 
-@{
-   ViewData["Title"] = "Chi tiết sản phẩm";
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart.css" />
 }
 
-<h1>Chi tiết sản phẩm</h1>
+@{
+    ViewData["Title"] = Model?.Name ?? "Chi tiết sản phẩm";
 
-<div>
-    <img src="@Model.imageUrl.FirstOrDefault()" alt="@Model.Name" style="width:100px;height:auto;" />
-    <h2>@Model.Name</h2>
-    <p>@Model.Description</p>
-    <h3>Biến thể sản phẩm:</h3>
-    @foreach (var variant in Model.Variants!)
-    {
-        <div>
-            <h4>@variant.Size - @variant.Color</h4>
-            @foreach (var img in variant.ImageUrlsVariants)
-            {
-                 <p>@img</p>
-                <img src="@img" alt="Variant Image" style="width:100px;height:auto;" />
-            }
-        </div>
-    }
+    var mainImage = (Model?.imageUrl != null && Model.imageUrl.Any())
+        ? Url.Content(Model.imageUrl.First())
+        : Url.Content("~/uploads/images/no-image.jpg");
 
-    <a asp-action="Index" asp-controller="Product" >Quay lại danh sách sản phẩm</a>
-</div>
+    var galleryImages = (Model?.imageUrl != null && Model.imageUrl.Any())
+        ? Model.imageUrl
+        : new List<string> { "~/uploads/images/no-image.jpg" };
+
+    var variants = Model?.Variants ?? Enumerable.Empty<dynamic>();
+    var sizes = variants
+        .Where(v => v != null && v.Size != null)
+        .Select(v => v.Size.ToString())
+        .Distinct()
+        .ToList();
+
+    var colors = variants
+        .Where(v => v != null && v.Color != null)
+        .Select(v => v.Color.ToString())
+        .Distinct()
+        .ToList();
+}
+
+<main class="product-page">
+    <div class="container">
+
+        <section class="product-main">
+            <section class="product-gallery card" aria-label="Bộ sưu tập ảnh sản phẩm">
+                <div class="product-gallery__main">
+                    <img src="@mainImage" alt="@Model?.Name" />
+                </div>
+
+                <div class="product-gallery__thumbs">
+                    @foreach (var image in galleryImages)
+                    {
+                        var thumbPath = image.StartsWith("~/") ? Url.Content(image) : Url.Content(image);
+                        <button type="button" class="thumb">
+                            <img src="@thumbPath" alt="@Model?.Name" />
+                        </button>
+                    }
+                </div>
+            </section>
+
+            <section class="product-info card" aria-label="Thông tin sản phẩm">
+                <div class="product-info__header">
+                    <p class="product-brand">AVANT ATELIER</p>
+                    <h1 class="product-title">@Model?.Name</h1>
+
+                    <div class="product-meta">
+                        <span>Thiết kế trẻ trung</span>
+                        <span>Phong cách hiện đại</span>
+                        <span>Dễ phối đồ</span>
+                    </div>
+                </div>
+
+                <section class="product-variants">
+                    <h2 class="section-subtitle">Phân loại</h2>
+
+                    @if (colors.Any())
+                    {
+                        <div class="variant-group">
+                            <h3 class="variant-label">Màu sắc</h3>
+                            <div class="variant-options">
+                                @foreach (var color in colors)
+                                {
+                                    <button type="button" class="variant-chip">@color</button>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (sizes.Any())
+                    {
+                        <div class="variant-group">
+                            <h3 class="variant-label">Kích thước</h3>
+                            <div class="variant-options">
+                                @foreach (var size in sizes)
+                                {
+                                    <button type="button" class="variant-chip">@size</button>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="variant-group">
+                        <h3 class="variant-label">Số lượng</h3>
+                        <div class="quantity-box">
+                            <button type="button" class="qty-btn">-</button>
+                            <input type="number" name="Quantity" value="1" min="1" />
+                            <button type="button" class="qty-btn">+</button>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="product-actions">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-outline">Quay lại</a>
+                    <button type="button" class="btn btn-primary">Thêm vào giỏ</button>
+                </div>
+            </section>
+        </section>
+
+        <section class="content-section card">
+            <h2 class="section-title">Mô tả sản phẩm</h2>
+            <div class="content-body">
+                @if (!string.IsNullOrWhiteSpace(Model?.Description))
+                {
+                    <p>@Model.Description</p>
+                }
+                else
+                {
+                    <p>Sản phẩm hiện chưa có mô tả.</p>
+                }
+            </div>
+        </section>
+        <!-- biến thể -->
+      
+    </div>
+</main>

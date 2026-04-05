@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿@* <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -49,6 +49,150 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>  *@
+@{
+    var title = ViewData["Title"] ?? "Demo_web_MVC";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+    var isShopPage =
+        controller.Equals("Home", StringComparison.OrdinalIgnoreCase) ||
+        controller.Equals("Product", StringComparison.OrdinalIgnoreCase) ||
+        controller.Equals("Cart", StringComparison.OrdinalIgnoreCase);
+
+    var keyword = ViewBag.Keyword != null ? ViewBag.Keyword.ToString() : "";
+    var cartCount = ViewBag.CartCount != null ? (int)ViewBag.CartCount : 0;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@title - Demo_web_MVC</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Demo_web_MVC.styles.css" asp-append-version="true" />
+
+    @RenderSection("Styles", required: false)
+</head>
+<body class="@(isShopPage ? "shop-layout-body" : "")">
+
+    @if (isShopPage)
+    {
+        <!-- Header riêng cho khu shop -->
+        <header class="shop-header">
+            <div class="container shop-header__inner">
+                <a href="@Url.Action("Index", "Home")" class="shop-logo">
+                    <span class="shop-logo__icon">M</span>
+                    <span class="shop-logo__text">MyShop</span>
+                </a>
+
+                <form method="get" action="@Url.Action("Index", "Home")" class="shop-search">
+                    <input type="text" name="keyword" value="@keyword" placeholder="Tìm kiếm sản phẩm hot, deal đẹp..." />
+                    <button type="submit">Tìm kiếm</button>
+                </form>
+
+                <div class="shop-actions">
+                    <a href="@Url.Action("Index", "Cart")" class="shop-cart" title="Giỏ hàng">
+                        <span class="shop-cart__icon">🛒</span>
+                        <span class="shop-cart__text">Giỏ hàng</span>
+                        <span class="shop-cart__count">@cartCount</span>
+                    </a>
+
+                    <div class="shop-user-tools">
+                        <partial name="_LoginPartial" />
+                        <partial name="_MenuManagePartial" />
+                    </div>
+                </div>
+            </div>
+        </header>
+    }
+    else
+    {
+        <!-- Navbar mặc định cho trang không phải shop -->
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Demo_web_MVC</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="UpdateRole">UpdateRole</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            </li>
+                        </ul>
+
+                        <partial name="_LoginPartial" />
+                        <partial name="_MenuManagePartial" />
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    @if (isShopPage)
+    {
+        <main class="shop-main">
+            @RenderBody()
+        </main>
+
+        <footer class="shop-footer">
+            <div class="container shop-footer__inner">
+                <div>
+                    <h4>MyShop</h4>
+                    <p>Mua sắm hiện đại, giao diện trẻ trung, dễ xem và dễ chọn.</p>
+                </div>
+
+                <div>
+                    <h4>Liên kết nhanh</h4>
+                    <ul class="shop-footer__links">
+                        <li><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                        <li><a href="@Url.Action("Index", "Product")">Sản phẩm</a></li>
+                        <li><a href="@Url.Action("Index", "Cart")">Giỏ hàng</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="shop-footer__bottom">
+                <div class="container">
+                    <p>© @DateTime.Now.Year - MyShop</p>
+                </div>
+            </div>
+        </footer>
+    }
+    else
+    {
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+
+        <footer class="border-top footer text-muted">
+            <div class="container">
+                &copy; 2026 - Demo_web_MVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

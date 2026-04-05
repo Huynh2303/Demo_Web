@@ -1,9 +1,11 @@
 ﻿using Demo_web_MVC.Data;
 using Demo_web_MVC.Data.AppDatabase;
 using Demo_web_MVC.Repository;
+using Demo_web_MVC.Repository.Carts;
 using Demo_web_MVC.Repository.Category;
 using Demo_web_MVC.Repository.Product;
 using Demo_web_MVC.Service;
+using Demo_web_MVC.Service.Cart;
 using Demo_web_MVC.Service.Category;
 using Demo_web_MVC.Service.Product;
 using Demo_web_MVC.Service.Sendemail;
@@ -23,6 +25,8 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped< IProductService,ProductService>();
 builder.Services.AddScoped<IEmailServices, Sendemail>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddDbContext<AppDatabase>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

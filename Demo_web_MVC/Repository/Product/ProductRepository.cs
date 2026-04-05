@@ -19,7 +19,7 @@ namespace Demo_web_MVC.Repository.Product
 
         public async Task<List<ProductViewModel>> GetAllAsync()
         {
-            var products = await _context.Products.AsNoTracking().Include(p=>p.ProductImages).Select(p => new ProductViewModel
+            var products = await _context.Products.AsNoTracking().AsSplitQuery().Select(p => new ProductViewModel
             {
                 Id = p.Id,
                 CategoryId = p.CategoryId,
@@ -27,7 +27,12 @@ namespace Demo_web_MVC.Repository.Product
                 Description = p.Description,
                 Brand = p.Brand,
                 CreatedAt = p.CreatedAt,
-                imageUrl = p.ProductImages.Select(pi => pi.Url).ToList() ?? new List<string>()
+                imageUrl = p.ProductImages.Select(pi => pi.Url).ToList() ?? new List<string>(),
+                Variants = p.ProductVariants.Select(v => new ProductVariantsViewModel
+                {
+                    Price = v.Price,
+                    Stock = v.Stock,
+                }).ToList() 
             }).ToListAsync();
             return products;
         }
@@ -190,6 +195,7 @@ namespace Demo_web_MVC.Repository.Product
                 {
                     _context.ProductImages.RemoveRange(product.ProductImages);
                 }
+                
                 // Xóa variants trước (explicit)
                 _context.ProductVariants.RemoveRange(product.ProductVariants);
 
