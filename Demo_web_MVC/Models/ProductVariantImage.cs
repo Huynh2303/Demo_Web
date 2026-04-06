@@ -1,4 +1,6 @@
-﻿namespace Demo_web_MVC.Models
+﻿using Demo_web_MVC.Models.ViewModel.Product;
+
+namespace Demo_web_MVC.Models
 {
     public class ProductVariantImage
     {
@@ -12,5 +14,6 @@
 
         // Navigation property
         public ProductVariant Variant { get; set; } = null!;
+        
     }
 }

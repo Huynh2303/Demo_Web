@@ -1,8 +1,21 @@
 ﻿@model Demo_web_MVC.Models.ViewModel.Product.ProductViewModel
 @using System.Linq
+@using System.Text.Json
 
 @section Styles {
     <link rel="stylesheet" href="~/css/cart.css" />
+    <style>
+        .variant-chip.active {
+            background-color: #c4c577;
+            color: #fff;
+            border-color: #c4c577;
+        }
+
+        .variant-chip.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
 }
 
 @{
@@ -17,17 +30,30 @@
         : new List<string> { "~/uploads/images/no-image.jpg" };
 
     var variants = Model?.Variants ?? Enumerable.Empty<dynamic>();
-    var sizes = variants
-        .Where(v => v != null && v.Size != null)
-        .Select(v => v.Size.ToString())
+
+    var variantList = variants
+        .Where(v => v != null)
+        .Select(v => new
+        {
+            Id = (int)v.Id,
+            Color = v.Color != null ? v.Color.ToString() : string.Empty,
+            Size = v.Size != null ? v.Size.ToString() : string.Empty
+        })
+        .ToList();
+
+    var colors = variantList
+        .Where(v => !string.IsNullOrWhiteSpace(v.Color))
+        .Select(v => v.Color)
         .Distinct()
         .ToList();
 
-    var colors = variants
-        .Where(v => v != null && v.Color != null)
-        .Select(v => v.Color.ToString())
+    var sizes = variantList
+        .Where(v => !string.IsNullOrWhiteSpace(v.Size))
+        .Select(v => v.Size)
         .Distinct()
         .ToList();
+
+    var firstVariantId = variantList.FirstOrDefault()?.Id ?? 0;
 }
 
 <main class="product-page">
@@ -69,10 +95,10 @@
                     {
                         <div class="variant-group">
                             <h3 class="variant-label">Màu sắc</h3>
-                            <div class="variant-options">
+                            <div class="variant-options" id="colorOptions">
                                 @foreach (var color in colors)
                                 {
-                                    <button type="button" class="variant-chip">@color</button>
+                                    <button type="button" class="variant-chip color-option" data-color="@color">@color</button>
                                 }
                             </div>
                         </div>
@@ -82,10 +108,10 @@
                     {
                         <div class="variant-group">
                             <h3 class="variant-label">Kích thước</h3>
-                            <div class="variant-options">
+                            <div class="variant-options" id="sizeOptions">
                                 @foreach (var size in sizes)
                                 {
-                                    <button type="button" class="variant-chip">@size</button>
+                                    <button type="button" class="variant-chip size-option" data-size="@size">@size</button>
                                 }
                             </div>
                         </div>
@@ -94,16 +120,22 @@
                     <div class="variant-group">
                         <h3 class="variant-label">Số lượng</h3>
                         <div class="quantity-box">
-                            <button type="button" class="qty-btn">-</button>
-                            <input type="number" name="Quantity" value="1" min="1" />
-                            <button type="button" class="qty-btn">+</button>
+                            <button type="button" class="qty-btn" id="decreaseQty">-</button>
+                            <input type="number" id="quantityInput" name="Quantity" value="1" min="1" />
+                            <button type="button" class="qty-btn" id="increaseQty">+</button>
                         </div>
                     </div>
                 </section>
 
                 <div class="product-actions">
                     <a asp-controller="Product" asp-action="Index" class="btn btn-outline">Quay lại</a>
-                    <button type="button" class="btn btn-primary">Thêm vào giỏ</button>
+
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post" id="addToCartForm" style="display:inline;">
+                        <input type="hidden" name="userId" value="1" />
+                        <input type="hidden" name="variantId" id="selectedVariantId" value="@firstVariantId" />
+                        <input type="hidden" name="quantity" id="hiddenQuantity" value="1" />
+                        <button type="submit" class="btn btn-primary">Thêm vào giỏ</button>
+                    </form>
                 </div>
             </section>
         </section>
@@ -121,7 +153,181 @@
                 }
             </div>
         </section>
-        <!-- biến thể -->
-      
     </div>
 </main>
+
+@section Scripts {
+    <script>
+        const variants = @Html.Raw(JsonSerializer.Serialize(variantList));
+
+        let selectedColor = null;
+        let selectedSize = null;
+
+        const colorButtons = document.querySelectorAll('.color-option');
+        const sizeButtons = document.querySelectorAll('.size-option');
+        const selectedVariantInput = document.getElementById('selectedVariantId');
+        const addToCartForm = document.getElementById('addToCartForm');
+        const quantityInput = document.getElementById('quantityInput');
+        const hiddenQuantity = document.getElementById('hiddenQuantity');
+        const decreaseQty = document.getElementById('decreaseQty');
+        const increaseQty = document.getElementById('increaseQty');
+
+        function normalize(value) {
+            return (value || '').toString().trim().toLowerCase();
+        }
+
+        function setActiveButton(buttons, activeButton) {
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+        }
+
+        function getAvailableSizesByColor(color) {
+            return variants
+                .filter(v => normalize(v.Color) === normalize(color))
+                .map(v => normalize(v.Size));
+        }
+
+        function getAvailableColorsBySize(size) {
+            return variants
+                .filter(v => normalize(v.Size) === normalize(size))
+                .map(v => normalize(v.Color));
+        }
+
+        function refreshSizeOptions() {
+            if (!sizeButtons.length) return;
+
+            const availableSizes = selectedColor ? getAvailableSizesByColor(selectedColor) : [];
+
+            sizeButtons.forEach(btn => {
+                const btnSize = normalize(btn.dataset.size);
+                const isAvailable = !selectedColor || availableSizes.includes(btnSize);
+
+                btn.disabled = !isAvailable;
+                btn.classList.toggle('disabled', !isAvailable);
+
+                if (!isAvailable && normalize(selectedSize) === btnSize) {
+                    btn.classList.remove('active');
+                    selectedSize = null;
+                }
+            });
+        }
+
+        function refreshColorOptions() {
+            if (!colorButtons.length) return;
+
+            const availableColors = selectedSize ? getAvailableColorsBySize(selectedSize) : [];
+
+            colorButtons.forEach(btn => {
+                const btnColor = normalize(btn.dataset.color);
+                const isAvailable = !selectedSize || availableColors.includes(btnColor);
+
+                btn.disabled = !isAvailable;
+                btn.classList.toggle('disabled', !isAvailable);
+
+                if (!isAvailable && normalize(selectedColor) === btnColor) {
+                    btn.classList.remove('active');
+                    selectedColor = null;
+                }
+            });
+        }
+
+        function updateVariantId() {
+            let matchedVariant = null;
+
+            if (selectedColor && selectedSize) {
+                matchedVariant = variants.find(v =>
+                    normalize(v.Color) === normalize(selectedColor) &&
+                    normalize(v.Size) === normalize(selectedSize)
+                );
+            }
+
+            selectedVariantInput.value = matchedVariant ? matchedVariant.Id : '';
+        }
+
+        function syncQuantity() {
+            let qty = parseInt(quantityInput.value, 10) || 1;
+            if (qty < 1) qty = 1;
+            quantityInput.value = qty;
+            hiddenQuantity.value = qty;
+        }
+
+        colorButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                if (this.disabled) return;
+
+                const sameButton = normalize(selectedColor) === normalize(this.dataset.color);
+                selectedColor = sameButton ? null : this.dataset.color;
+
+                setActiveButton(colorButtons, sameButton ? null : this);
+                refreshSizeOptions();
+                refreshColorOptions();
+                updateVariantId();
+            });
+        });
+
+        sizeButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                if (this.disabled) return;
+
+                const sameButton = normalize(selectedSize) === normalize(this.dataset.size);
+                selectedSize = sameButton ? null : this.dataset.size;
+
+                setActiveButton(sizeButtons, sameButton ? null : this);
+                refreshColorOptions();
+                refreshSizeOptions();
+                updateVariantId();
+            });
+        });
+
+        if (quantityInput) {
+            quantityInput.addEventListener('input', syncQuantity);
+        }
+
+        if (decreaseQty) {
+            decreaseQty.addEventListener('click', function () {
+                quantityInput.value = (parseInt(quantityInput.value, 10) || 1) - 1;
+                syncQuantity();
+            });
+        }
+
+        if (increaseQty) {
+            increaseQty.addEventListener('click', function () {
+                quantityInput.value = (parseInt(quantityInput.value, 10) || 1) + 1;
+                syncQuantity();
+            });
+        }
+
+        if (addToCartForm) {
+            addToCartForm.addEventListener('submit', function (e) {
+                syncQuantity();
+
+                const hasColor = colorButtons.length > 0;
+                const hasSize = sizeButtons.length > 0;
+
+                if (hasColor && !selectedColor) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn màu sắc trước khi thêm vào giỏ hàng.');
+                    return;
+                }
+
+                if (hasSize && !selectedSize) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn kích thước trước khi thêm vào giỏ hàng.');
+                    return;
+                }
+
+                if (!selectedVariantInput.value) {
+                    e.preventDefault();
+                    alert('Biến thể sản phẩm không hợp lệ. Vui lòng chọn lại màu sắc và kích thước.');
+                }
+            });
+        }
+
+        refreshSizeOptions();
+        refreshColorOptions();
+        syncQuantity();
+        updateVariantId();
+    </script>
+}

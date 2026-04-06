@@ -56,7 +56,7 @@ namespace Demo_web_MVC.Controllers
                 return View(model);
             }
             var role = await _context.Roles
-                .FirstAsync(r => r.Code == "USER");
+                .FirstAsync(r => r.Code == "CUSTOMER");
             var user = new User
             {
                 Username = model.Username!,
@@ -139,7 +139,7 @@ namespace Demo_web_MVC.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Login", "User");
         }
-
+        
         public IActionResult Login()
         {
             return View();
@@ -239,11 +239,18 @@ namespace Demo_web_MVC.Controllers
                 claims,
                 CookieAuthenticationDefaults.AuthenticationScheme
             );
-
+            var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity)
+                
             );
+            foreach (var claim in principal.Claims)
+            {
+                _logger.LogInformation("Claim Type: {Type}, Value: {Value}", claim.Type, claim.Value);
+            }
+
+
 
             return RedirectToAction("Index", "Home");
         }

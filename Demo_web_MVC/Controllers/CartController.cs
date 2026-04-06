@@ -1,6 +1,9 @@
 ﻿using Demo_web_MVC.Repository.Carts;
 using Demo_web_MVC.Service.Cart;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Demo_web_MVC.Controllers
 {
@@ -8,16 +11,19 @@ namespace Demo_web_MVC.Controllers
     {
         public readonly ICartService _cartService;
         public readonly ILogger<CartController> _logger;
-        public readonly ICartRepository _cartRepository;
-        public CartController(ICartService cartService, ILogger<CartController> logger, ICartRepository cartRepository)
+
+        public CartController(ICartService cartService, ILogger<CartController> logger)
         {
             _cartService = cartService;
             _logger = logger;
-            _cartRepository = cartRepository;
+
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int userid)
         {
-            return View();
+            var cartItems = await _cartService.GetCartItems(userid);
+            ViewBag.CartCount = cartItems.Count;
+
+            return View(cartItems);
         }
         public async Task<IActionResult> AddToCart(int userId, int variantId, int quantity)
         {
@@ -36,7 +42,33 @@ namespace Demo_web_MVC.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi thêm sản phẩm vào giỏ hàng.");
-                return StatusCode(500, "Đã xảy ra lỗi khi xử lý yêu cầu.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+        public async Task<IActionResult> RemoveItem( int cartItemId)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized("Không xác định được người dùng.");
+                }
+                var result = await _cartService.RemoveItemAsync(userId, cartItemId);
+                if (result)
+                {
+                    return Ok("Sản phẩm đã được xóa khỏi giỏ hàng.");
+                }
+                else
+                {
+                    return BadRequest("Không thể xóa sản phẩm khỏi giỏ hàng.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa sản phẩm khỏi giỏ hàng.");
+                return StatusCode(500, ex.Message);
             }
         }
     }

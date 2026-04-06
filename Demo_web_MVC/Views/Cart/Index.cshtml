@@ -1,0 +1,113 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.Carts.CartItemViewModel>
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+
+    var culture = new CultureInfo("vi-VN");
+    decimal totalAmount = Model != null ? Model.Sum(x => x.Price * x.Quantity) : 0;
+    int totalQuantity = Model != null ? Model.Sum(x => x.Quantity) : 0;
+}
+
+<link rel="stylesheet" href="~/css/Cartitems.css" />
+
+<div class="cart-page">
+    <div class="cart-container">
+
+        <div class="cart-header">
+            <div class="cart-header__left">
+                <span>Sản phẩm</span>
+            </div>
+            <div class="cart-header__right">
+                <span>Đơn giá</span>
+                <span>Số lượng</span>
+                <span>Số tiền</span>
+                <span>Thao tác</span>
+            </div>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="cart-empty">
+                <div class="cart-empty__icon">🛒</div>
+                <h3>Giỏ hàng của bạn đang trống</h3>
+                <p>Hãy thêm sản phẩm để tiếp tục mua sắm.</p>
+                <a href="@Url.Action("Index", "Product")" class="cart-empty__btn">Mua sắm ngay</a>
+            </div>
+        }
+        else
+        {
+            <div class="cart-list">
+                @foreach (var item in Model)
+                {
+                    var imagePath = !string.IsNullOrEmpty(item.ImageUrl)
+                        ? Url.Content(item.ImageUrl)
+                        : Url.Content("~/uploads/images/no-image.jpg");
+
+                    var itemTotal = item.Price * item.Quantity;
+
+                    <div class="cart-item">
+                        <div class="cart-item__product">
+                            <div class="cart-item__image-wrap">
+                                <img src="@imagePath" alt="@item.ProductName" class="cart-item__image" />
+                            </div>
+
+                            <div class="cart-item__info">
+                                <a href="#" class="cart-item__name">@item.ProductName</a>
+                                <div class="cart-item__variant">
+                                    Phân loại hàng:
+                                    @if (!string.IsNullOrEmpty(item.Color))
+                                    {
+                                        <span>@item.Color</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Size))
+                                    {
+                                        <span> - @item.Size</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(item.Brand))
+                                {
+                                    <div class="cart-item__brand">Thương hiệu: @item.Brand</div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="cart-item__price">
+                            @item.Price.ToString("c0", culture)
+                        </div>
+
+                        <div class="cart-item__quantity">
+                            <div class="quantity-box">
+                                <button type="button" class="qty-btn">-</button>
+                                <input type="text" value="@item.Quantity" readonly class="qty-input" />
+                                <button type="button" class="qty-btn">+</button>
+                            </div>
+                        </div>
+
+                        <div class="cart-item__total">
+                            @itemTotal.ToString("c0", culture)
+                        </div>
+                        <!--xóa-->
+                        <div class="cart-item__action">
+                            <a href="@Url.Action("RemoveItem", "Cart" ,new {cartItemId=item.Id})" class="delete-link">Xóa</a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="cart-footer">
+                <div class="cart-footer__left">
+                    <span>Tổng số lượng: <strong>@totalQuantity</strong></span>
+                </div>
+
+                <div class="cart-footer__right">
+                    <div class="cart-summary">
+                        <span>Tổng thanh toán:</span>
+                        <strong>@totalAmount.ToString("c0", culture)</strong>
+                    </div>
+                    <a href="#" class="checkout-btn">Mua hàng</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

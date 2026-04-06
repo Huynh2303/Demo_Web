@@ -1,12 +1,14 @@
 ﻿
 using Demo_web_MVC.Data.AppDatabase;
 using Demo_web_MVC.Models;
+using Demo_web_MVC.Models.ViewModel.Carts;
 using Demo_web_MVC.Models.ViewModel.Product;
 using Microsoft.EntityFrameworkCore;
+using Demo_web_MVC.Models.ViewModel;
 using System;
 namespace Demo_web_MVC.Repository.Carts
 {
-    public class CartRepository: ICartRepository
+    public class CartRepository : ICartRepository
     {
         public readonly AppDatabase _context;
         public CartRepository(AppDatabase context)
@@ -68,7 +70,52 @@ namespace Demo_web_MVC.Repository.Carts
             await _context.SaveChangesAsync();
             return true;
         }
-
+        public async Task<List<CartItemViewModel>> GetCartItemsAsync(int userId)
+        {
+            var cart = await _context.Carts
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+            if (cart == null)
+                return new List<CartItemViewModel>();
+            var cartItems = await _context.CartItems.AsNoTracking()
+                .Where(ci => ci.CartId == cart.Id)
+                .Select(ci => new CartItemViewModel
+                {
+                    Id = ci.Id,
+                    CartId = ci.CartId,
+                    VariantId = ci.VariantId,
+                    Quantity = ci.Quantity,
+                    ProductName = ci.Variant.Product.Name,
+                    Brand = ci.Variant.Product.Brand,
+                    Size = ci.Variant.Size,
+                    Color = ci.Variant.Color,
+                    Price = ci.Variant.Price,
+                    ImageUrl = ci.Variant.ProductVariantImages
+                        .Where(pvi => pvi.VariantId == ci.VariantId)
+                        .Select(pvi => pvi.Url)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+            return cartItems;
+        }
+        public async Task<bool> RemoveItemAsync(int userid,int cartItemId)
+        {
+           var cart = await _context.Carts.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.UserId == userid);
+            if (cart == null)
+            {
+                return false;
+            }
+           
+           
+            var cartItems = await _context.CartItems.FirstOrDefaultAsync(c=>c.Id == cartItemId && c.CartId == cart.Id );
+            if ( cartItems == null)
+            {
+                return false;
+            }
+            _context.CartItems.RemoveRange(cartItems);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
-    }
+}
 

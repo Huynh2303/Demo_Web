@@ -8,9 +8,9 @@ namespace Demo_web_MVC.Repository.Carts
     {
         Task<bool> AddToCartAsync(int userId, int variantId, int quantity);
         
-        //Task<List<CartItemViewModel>> GetCartItemsAsync(int userId);
+        Task<List<CartItemViewModel>> GetCartItemsAsync(int userId);
         //Task UpdateQuantityAsync(int userId, int cartItemId, int quantity);
-        //Task RemoveItemAsync(int userId, int cartItemId);
+        Task<bool> RemoveItemAsync(int userId, int cartItemId);
         //Task ClearCartAsync(int userId);
         //Task<int> GetCartCountAsync(int userId);
     }
