@@ -29,9 +29,6 @@ namespace Demo_web_MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
-            // Call the service to get product details by id
-            // var productDetails = await _productService.details(id);
-            // return View(productDetails);
             if (id == null)
             {
                 return NotFound("không có id ");
@@ -165,7 +162,6 @@ namespace Demo_web_MVC.Controllers
                 model.Categories = await _categoryService.GetAllCategories();
                 return View(model);
             }
-
             await _productService.update(id, model);
             return RedirectToAction("Index");
         }

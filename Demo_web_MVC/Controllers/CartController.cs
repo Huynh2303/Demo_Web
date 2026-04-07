@@ -1,4 +1,5 @@
-﻿using Demo_web_MVC.Repository.Carts;
+﻿using Demo_web_MVC.Models.ViewModel.Carts;
+using Demo_web_MVC.Repository.Carts;
 using Demo_web_MVC.Service.Cart;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -18,57 +19,119 @@ namespace Demo_web_MVC.Controllers
             _logger = logger;
 
         }
-        public async Task<IActionResult> Index(int userid)
+        private int? GetUserIdFromClaims()
         {
-            var cartItems = await _cartService.GetCartItems(userid);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return null;
+            }
+            return userId;
+        }
+        public async Task<IActionResult> Index()
+        {
+            var userid = GetUserIdFromClaims();
+            if ( userid == null)
+            {
+                return Unauthorized("Không xác định được người dùng.");
+            }
+            var cartItems = await _cartService.GetCartItems(userid.Value);
             ViewBag.CartCount = cartItems.Count;
 
             return View(cartItems);
         }
-        public async Task<IActionResult> AddToCart(int userId, int variantId, int quantity)
+        // Thêm sản phẩm vào giỏ hàng
+        [HttpPost]
+        public async Task<IActionResult> AddToCart(int variantId, int quantity)
         {
             try
             {
-                var result = await _cartService.AddToCartAsync(userId, variantId, quantity);
+                
+                var userId = GetUserIdFromClaims();
+                if(userId == null)
+                {
+                    return Unauthorized("Không xác định được người dùng.");
+                } 
+
+                var result = await _cartService.AddToCartAsync(userId.Value, variantId, quantity);
                 if (result)
                 {
-                    return Ok("Sản phẩm đã được thêm vào giỏ hàng.");
+                    TempData["SuccessMessage"] = "Sản phẩm đã được thêm vào giỏ hàng.";
                 }
                 else
                 {
-                    return BadRequest("Không thể thêm sản phẩm vào giỏ hàng.");
+                    TempData["ErrorMessage"] = "Không thể thêm sản phẩm vào giỏ hàng.";
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi thêm sản phẩm vào giỏ hàng.");
-                return StatusCode(500, ex.Message);
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi xử lý yêu cầu.";
             }
+
+            return RedirectToAction("Detials", "Product"); // Điều hướng lại trang giỏ hàng
         }
-        public async Task<IActionResult> RemoveItem( int cartItemId)
+
+        // Xóa sản phẩm khỏi giỏ hàng
+        [HttpPost]
+        public async Task<IActionResult> RemoveItem(int cartItemId)
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                var userId = GetUserIdFromClaims();
+                if (userId == null)
                 {
                     return Unauthorized("Không xác định được người dùng.");
                 }
-                var result = await _cartService.RemoveItemAsync(userId, cartItemId);
+
+                var result = await _cartService.RemoveItemAsync(userId.Value, cartItemId);
                 if (result)
                 {
-                    return Ok("Sản phẩm đã được xóa khỏi giỏ hàng.");
+                    TempData["SuccessMessage"] = "Sản phẩm đã được xóa khỏi giỏ hàng.";
                 }
                 else
                 {
-                    return BadRequest("Không thể xóa sản phẩm khỏi giỏ hàng.");
+                    TempData["ErrorMessage"] = "Không thể xóa sản phẩm khỏi giỏ hàng.";
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi xóa sản phẩm khỏi giỏ hàng.");
-                return StatusCode(500, ex.Message);
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi xử lý yêu cầu.";
+            }
+
+            return RedirectToAction("Index", "Cart"); 
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
+        {
+            try
+            {
+                var userId = GetUserIdFromClaims();
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "Không xác định được người dùng." });
+                }
+
+                var cartItemViewModel = new CartItemViewModel
+                {
+                    Id = cartItemId,
+                    Quantity = quantity,
+                };
+
+                var result = await _cartService.UpdateQuantityAsync(userId.Value, cartItemId, cartItemViewModel);
+
+                if (result == null)
+                {
+                    return Json(new { success = false, message = "Không thể cập nhật số lượng sản phẩm." });
+                }
+
+                return Json(new { success = true, message = "Số lượng sản phẩm đã được cập nhật." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi cập nhật số lượng sản phẩm trong giỏ hàng.");
+                return Json(new { success = false, message = "Đã xảy ra lỗi khi xử lý yêu cầu." });
             }
         }
     }

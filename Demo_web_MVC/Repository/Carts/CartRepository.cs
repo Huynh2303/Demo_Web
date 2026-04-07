@@ -97,24 +97,53 @@ namespace Demo_web_MVC.Repository.Carts
                 .ToListAsync();
             return cartItems;
         }
-        public async Task<bool> RemoveItemAsync(int userid,int cartItemId)
+        public async Task<bool> RemoveItemAsync(int userid, int cartItemId)
         {
-           var cart = await _context.Carts.AsNoTracking()
-                .FirstOrDefaultAsync(c => c.UserId == userid);
+            var cart = await _context.Carts.AsNoTracking()
+                 .FirstOrDefaultAsync(c => c.UserId == userid);
             if (cart == null)
             {
                 return false;
             }
-           
-           
-            var cartItems = await _context.CartItems.FirstOrDefaultAsync(c=>c.Id == cartItemId && c.CartId == cart.Id );
-            if ( cartItems == null)
+
+
+            var cartItems = await _context.CartItems.FirstOrDefaultAsync(c => c.Id == cartItemId && c.CartId == cart.Id);
+            if (cartItems == null)
             {
                 return false;
             }
             _context.CartItems.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<CartItemViewModel> UpdateQuantityAsync(int userId, int cartItemId, CartItemViewModel cartItemViewModel)
+        {
+
+            var cart = await _context.Carts.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+            if (cart == null)
+            {
+                throw new Exception("Giỏ hàng không tồn tại.");
+            }
+            var cartItem = await _context.CartItems
+                                  .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.CartId == cart.Id);
+            if (cartItem == null)
+            {
+                throw new Exception("Mục giỏ hàng không tồn tại.");
+            }
+            if (cartItemViewModel.Quantity <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(cartItemViewModel.Quantity), "Số lượng phải lớn hơn 0.");
+            }
+            cartItem.Quantity = cartItemViewModel.Quantity;
+            await _context.SaveChangesAsync();
+            return new CartItemViewModel
+            {
+                Id = cartItem.Id,                 // Trả về Id của CartItem
+                CartId = cartItem.CartId,         // Trả về CartId của CartItem
+                VariantId = cartItem.VariantId,   // Trả về VariantId của CartItem
+                Quantity = cartItem.Quantity      // Trả về Quantity của CartItem
+            };
         }
     }
 }

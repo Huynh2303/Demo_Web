@@ -131,7 +131,7 @@
                     <a asp-controller="Product" asp-action="Index" class="btn btn-outline">Quay lại</a>
 
                     <form asp-controller="Cart" asp-action="AddToCart" method="post" id="addToCartForm" style="display:inline;">
-                        <input type="hidden" name="userId" value="1" />
+                        
                         <input type="hidden" name="variantId" id="selectedVariantId" value="@firstVariantId" />
                         <input type="hidden" name="quantity" id="hiddenQuantity" value="1" />
                         <button type="submit" class="btn btn-primary">Thêm vào giỏ</button>

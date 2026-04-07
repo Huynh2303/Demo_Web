@@ -78,9 +78,9 @@
 
                         <div class="cart-item__quantity">
                             <div class="quantity-box">
-                                <button type="button" class="qty-btn">-</button>
-                                <input type="text" value="@item.Quantity" readonly class="qty-input" />
-                                <button type="button" class="qty-btn">+</button>
+                                <button type="button" class="qty-btn" onclick="updateQuantity(@item.Id, -1)">-</button>
+                                <input type="text" value="@item.Quantity" id="qty-input-@item.Id" readonly class="qty-input" />
+                                <button type="button" class="qty-btn" onclick="updateQuantity(@item.Id, 1)">+</button>
                             </div>
                         </div>
 
@@ -111,3 +111,48 @@
         }
     </div>
 </div>
+@section Scripts{
+                              <script>
+                                                                    function updateQuantity(cartItemId, change) {
+                                                                var currentQuantity = parseInt($('#qty-input-' + cartItemId).val()); // Lấy số lượng hiện tại
+                                                                var newQuantity = currentQuantity + change; // Tính toán số lượng mới
+
+                                                                // Kiểm tra nếu số lượng hợp lệ (lớn hơn 0)
+                                                                if (newQuantity <= 0) {
+                                                                    alert("Số lượng phải lớn hơn 0");
+                                                                    return;
+                                                                }
+
+                                                                // Gửi yêu cầu AJAX để cập nhật số lượng
+                                                                $.ajax({
+                                                                    url: '@Url.Action("UpdateQuantity", "Cart")', // Thay "Cart" bằng tên controller của bạn
+                                                                    type: 'POST',
+                                                                    data: {
+                                                                        cartItemId: cartItemId,
+                                                                        quantity: newQuantity
+                                                                    },
+                                                                    success: function(response) {
+                                                                        if (response.success) {
+                                                                            // Cập nhật số lượng trên giao diện
+                                                                            $('#qty-input-' + cartItemId).val(newQuantity);
+                                                                            alert('Giỏ hàng đã được cập nhật!');
+                                                                        } else {
+                                                                            alert('Không thể cập nhật giỏ hàng.');
+                                                                        }
+                                                                    },
+                                                                    error: function() {
+                                                                        alert('Đã xảy ra lỗi.');
+                                                                    }
+                                                                });
+                                                            }
+                                                            // success: function(response) {
+                                                            //     if (response.success) {
+                                                            //         //Cập nhật số lượng trong input
+                                                            //         $('#qty-input-' + cartItemId).val(newQuantity);
+                                                            //         alert('Giỏ hàng đã được cập nhật!');
+                                                            //     } else {
+                                                            //         alert('Không thể cập nhật giỏ hàng.');
+                                                            //     }
+                                                            // }
+                              </script>
+}

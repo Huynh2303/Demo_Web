@@ -34,5 +34,15 @@ namespace Demo_web_MVC.Service.Cart
                 throw new Exception("Người dùng không hợp lệ.");
             return await _cartRepository.RemoveItemAsync(userId, cartItemId);
         }
+        public async Task<CartItemViewModel> UpdateQuantityAsync(int userId, int cartItemId, CartItemViewModel cartItemViewModel)
+        {
+            if (cartItemId <= 0)
+                throw new Exception("Biến thể sản phẩm không hợp lệ.");
+            if (userId <= 0)
+                throw new Exception("Người dùng không hợp lệ.");
+            if (cartItemViewModel.Quantity <= 0)
+                throw new Exception("Số lượng phải lớn hơn 0.");
+            return await _cartRepository.UpdateQuantityAsync(userId, cartItemId, cartItemViewModel);
+        }
     }
 }
