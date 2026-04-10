@@ -112,7 +112,7 @@ namespace Demo_web_MVC.Repository.Carts
             {
                 return false;
             }
-            _context.CartItems.RemoveRange(cartItems);
+            _context.CartItems.Remove(cartItems);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -125,7 +125,7 @@ namespace Demo_web_MVC.Repository.Carts
             {
                 throw new Exception("Giỏ hàng không tồn tại.");
             }
-            var cartItem = await _context.CartItems
+            var cartItem = await _context.CartItems.Include(ci => ci.Variant)
                                   .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.CartId == cart.Id);
             if (cartItem == null)
             {
@@ -136,13 +136,15 @@ namespace Demo_web_MVC.Repository.Carts
                 throw new ArgumentOutOfRangeException(nameof(cartItemViewModel.Quantity), "Số lượng phải lớn hơn 0.");
             }
             cartItem.Quantity = cartItemViewModel.Quantity;
+            cartItem.Variant.Price = cartItemViewModel.Price; 
             await _context.SaveChangesAsync();
             return new CartItemViewModel
             {
-                Id = cartItem.Id,                 // Trả về Id của CartItem
-                CartId = cartItem.CartId,         // Trả về CartId của CartItem
-                VariantId = cartItem.VariantId,   // Trả về VariantId của CartItem
-                Quantity = cartItem.Quantity      // Trả về Quantity của CartItem
+                Id = cartItem.Id,   
+                CartId = cartItem.CartId,         
+                VariantId = cartItem.VariantId,   
+                Quantity = cartItem.Quantity,
+                Price = cartItem.Variant.Price
             };
         }
     }

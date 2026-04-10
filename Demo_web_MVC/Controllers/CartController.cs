@@ -1,4 +1,5 @@
-﻿using Demo_web_MVC.Models.ViewModel.Carts;
+﻿using Demo_web_MVC.Models;
+using Demo_web_MVC.Models.ViewModel.Carts;
 using Demo_web_MVC.Repository.Carts;
 using Demo_web_MVC.Service.Cart;
 using Microsoft.AspNetCore.Mvc;
@@ -112,11 +113,13 @@ namespace Demo_web_MVC.Controllers
                 {
                     return Json(new { success = false, message = "Không xác định được người dùng." });
                 }
-
+                // Lấy toàn bộ giỏ hàng để tính tổng
+                var cartItems = await _cartService.GetCartItems(userId.Value);
                 var cartItemViewModel = new CartItemViewModel
                 {
                     Id = cartItemId,
                     Quantity = quantity,
+                    Price= cartItems.FirstOrDefault(x => x.Id == cartItemId)?.Price ?? 0 
                 };
 
                 var result = await _cartService.UpdateQuantityAsync(userId.Value, cartItemId, cartItemViewModel);
@@ -126,7 +129,33 @@ namespace Demo_web_MVC.Controllers
                     return Json(new { success = false, message = "Không thể cập nhật số lượng sản phẩm." });
                 }
 
-                return Json(new { success = true, message = "Số lượng sản phẩm đã được cập nhật." });
+                // Thành tiền của riêng item vừa update
+                //var itemTotal = result.Price * result.Quantity;
+
+
+
+                //var totalQuantity = cartItems.Sum(x => x.Quantity);
+                //var totalAmount = cartItems.Sum(x => x.Price * x.Quantity);
+                //return Json(new
+                //{
+                //    success = true,
+                //    message = "Số lượng sản phẩm đã được cập nhật.",
+                //    itemTotal = itemTotal,
+                //    itemTotalFormatted = itemTotal.ToString("c0", new System.Globalization.CultureInfo("vi-VN")),
+                //    totalQuantity = totalQuantity,
+                //    totalAmount = totalAmount,
+                //    totalAmountFormatted = totalAmount.ToString("c0", new System.Globalization.CultureInfo("vi-VN"))
+                //});
+                var itemTotal = result.Price * result.Quantity;
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Số lượng sản phẩm đã được cập nhật.",
+                    itemTotal = itemTotal,
+                    itemTotalFormatted = itemTotal.ToString("c0", new System.Globalization.CultureInfo("vi-VN"))
+                });
+
             }
             catch (Exception ex)
             {

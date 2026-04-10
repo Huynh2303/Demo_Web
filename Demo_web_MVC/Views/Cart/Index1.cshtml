@@ -9,10 +9,22 @@
     int totalQuantity = Model != null ? Model.Sum(x => x.Quantity) : 0;
 }
 
-<link rel="stylesheet" href="~/css/Cartitems1.css" />
+<link rel="stylesheet" href="~/css/Cartitems.css" />
 
 <div class="cart-page">
     <div class="cart-container">
+
+        <div class="cart-header">
+            <div class="cart-header__left">
+                <span>Sản phẩm</span>
+            </div>
+            <div class="cart-header__right">
+                <span>Đơn giá</span>
+                <span>Số lượng</span>
+                <span>Số tiền</span>
+                <span>Thao tác</span>
+            </div>
+        </div>
 
         @if (Model == null || !Model.Any())
         {
@@ -25,21 +37,6 @@
         }
         else
         {
-            <div class="cart-header">
-                <div class="cart-header__check">
-                    <input type="checkbox" id="check-all" class="cart-checkbox" />
-                </div>
-
-                <div class="cart-header__product">
-                    Sản phẩm
-                </div>
-
-                <div class="cart-header__price">Đơn giá</div>
-                <div class="cart-header__quantity">Số lượng</div>
-                <div class="cart-header__total">Số tiền</div>
-                <div class="cart-header__action">Thao tác</div>
-            </div>
-
             <div class="cart-list">
                 @foreach (var item in Model)
                 {
@@ -50,10 +47,6 @@
                     var itemTotal = item.Price * item.Quantity;
 
                     <div class="cart-item" data-id="@item.Id">
-                        <div class="cart-item__check">
-                            <input type="checkbox" class="cart-checkbox item-check" value="@item.Id" />
-                        </div>
-
                         <div class="cart-item__product">
                             <div class="cart-item__image-wrap">
                                 <img src="@imagePath" alt="@item.ProductName" class="cart-item__image" />
@@ -61,7 +54,6 @@
 
                             <div class="cart-item__info">
                                 <a href="#" class="cart-item__name">@item.ProductName</a>
-
                                 <div class="cart-item__variant">
                                     Phân loại hàng:
                                     @if (!string.IsNullOrEmpty(item.Color))
@@ -73,47 +65,50 @@
                                         <span> - @item.Size</span>
                                     }
                                 </div>
-
                                 @if (!string.IsNullOrEmpty(item.Brand))
                                 {
                                     <div class="cart-item__brand">Thương hiệu: @item.Brand</div>
                                 }
-
-                                <div id="message-@item.Id" class="cart-item__message"></div>
                             </div>
                         </div>
 
                         <div class="cart-item__price">
-                            <span class="item-price" data-price="@item.Price">
-                                @item.Price.ToString("c0", culture)
-                            </span>
+                            <span class="item-price" data-price="@item.Price">@item.Price.ToString("c0", culture)</span>
                         </div>
 
                         <div class="cart-item__quantity">
                             <div class="quantity-box">
-                                <button type="button" class="qty-btn" onclick="updateQuantity(@item.Id, -1)">−</button>
+                                <button type="button" class="qty-btn" onclick="updateQuantity(@item.Id, -1)">-</button>
                                 <input type="text" value="@item.Quantity" id="qty-input-@item.Id" readonly class="qty-input" />
                                 <button type="button" class="qty-btn" onclick="updateQuantity(@item.Id, 1)">+</button>
                             </div>
                         </div>
 
                         <div class="cart-item__total">
-                            <span id="itemTotal-@item.Id" class="item-total" data-total="@itemTotal">
-                                @itemTotal.ToString("c0", culture)
-                            </span>
+                            <span id="itemTotal-@item.Id" class="item-total" data-total="@itemTotal">@itemTotal.ToString("c0", culture)</span>
                         </div>
-
+                        <!--xóa-->
                         <div class="cart-item__action">
-    <form asp-controller="Cart" asp-action="RemoveItem" method="post" style="display:inline;">
-        <input type="hidden" name="cartItemId" value="@item.Id" />
-        <button type="submit" class="delete-link">Xóa</button>
-    </form>
-</div>
+                            <a href="@Url.Action("RemoveItem", "Cart" ,new {cartItemId=item.Id})" class="delete-link">Xóa</a>
+                        </div>
                     </div>
                 }
             </div>
 
-            
+            @*  <div class="cart-footer">
+                <div class="cart-footer__left">
+                    <span>Tổng số lượng: <strong id="totalQuantity">@totalQuantity</strong></span>
+                </div>
+
+                <div class="cart-footer__right">
+                    <div class="cart-summary">
+                        <span>Tổng thanh toán:</span>
+                        <strong class="cart-summary-total" id="totalAmount">
+                            @totalAmount.ToString("c0", culture)
+                        </strong>
+                    </div>
+                </div>
+            </div> *@
             <div class="cart-footer">
                 <div class="cart-footer__left">
                     <label class="cart-footer__select-all">
@@ -140,7 +135,63 @@
     </div>
 </div>
 
+@* @section Scripts {
+    <script>
+        function updateQuantity(cartItemId, change) {
+            var qtyInput = $('#qty-input-' + cartItemId);
+            var currentQuantity = parseInt(qtyInput.val());
 
+            if (isNaN(currentQuantity)) {
+                $('#message-' + cartItemId).text("Số lượng không hợp lệ").css("color", "red");
+                return;
+            }
+
+            var newQuantity = currentQuantity + change;
+
+            if (newQuantity <= 0) {
+                $('#message-' + cartItemId).text("Số lượng phải lớn hơn 0").css("color", "red");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("UpdateQuantity", "Cart")',
+                type: 'POST',
+                data: {
+                    cartItemId: cartItemId,
+                    quantity: newQuantity
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // cập nhật lại ô số lượng
+                        qtyInput.val(newQuantity);
+
+                        // cập nhật thành tiền của dòng sản phẩm
+                        $('#itemTotal-' + cartItemId).text(response.itemTotalFormatted);
+
+                        // cập nhật tổng số lượng toàn giỏ
+                        $('#totalQuantity').text(response.totalQuantity);
+
+                        // cập nhật tổng tiền toàn giỏ
+                        $('#totalAmount').text(response.totalAmountFormatted);
+
+                        $('#message-' + cartItemId)
+                            .text("Giỏ hàng đã được cập nhật!")
+                            .css("color", "green");
+                    } else {
+                        $('#message-' + cartItemId)
+                            .text(response.message || "Không thể cập nhật giỏ hàng.")
+                            .css("color", "red");
+                    }
+                },
+                error: function () {
+                    $('#message-' + cartItemId)
+                        .text("Đã xảy ra lỗi.")
+                        .css("color", "red");
+                }
+            });
+        }
+    </script>
+} *@
 @section Scripts {
 <script>
     function formatCurrencyVND(amount) {
