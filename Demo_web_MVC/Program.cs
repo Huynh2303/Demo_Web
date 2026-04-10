@@ -1,12 +1,16 @@
 ﻿using Demo_web_MVC.Data;
 using Demo_web_MVC.Data.AppDatabase;
 using Demo_web_MVC.Repository;
+using Demo_web_MVC.Repository.Addresss;
 using Demo_web_MVC.Repository.Carts;
 using Demo_web_MVC.Repository.Category;
+using Demo_web_MVC.Repository.Oder;
 using Demo_web_MVC.Repository.Product;
 using Demo_web_MVC.Service;
+using Demo_web_MVC.Service.Address;
 using Demo_web_MVC.Service.Cart;
 using Demo_web_MVC.Service.Category;
+using Demo_web_MVC.Service.Oder;
 using Demo_web_MVC.Service.Product;
 using Demo_web_MVC.Service.Sendemail;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -17,8 +21,10 @@ using Microsoft.Extensions.FileProviders;
 using NETCore.MailKit.Core;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
+builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<IAddressRepository, AddressRepository>();
+builder.Services.AddScoped<IOderService, OderService>();
+builder.Services.AddScoped<IOderRepository, OderRepository>();
 builder.Services.AddScoped< ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
