@@ -1,4 +1,4 @@
-﻿using Demo_web_MVC.Data.AppDatabase;
+﻿    using Demo_web_MVC.Data.AppDatabase;
 using Demo_web_MVC.Models.ViewModel.Address;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +27,9 @@ namespace Demo_web_MVC.Repository.Addresss
                     AddressLine = a.AddressLine,
                     City = a.City,
                     Country = a.Country,
-                    IsDefault = a.IsDefault
+                    IsDefault = a.IsDefault,
+                    RecipientName = a.RecipientName,
+                    PhoneNumber = a.PhoneNumber
                 }).ToListAsync();
                 return addresses;
             }
@@ -49,7 +51,9 @@ namespace Demo_web_MVC.Repository.Addresss
                     AddressLine = a.AddressLine,
                     City = a.City,
                     Country = a.Country,
-                    IsDefault = a.IsDefault
+                    IsDefault = a.IsDefault,
+                    RecipientName = a.RecipientName,
+                    PhoneNumber = a.PhoneNumber
                 }).FirstOrDefaultAsync();
             }
             catch (Exception ex)
@@ -72,6 +76,8 @@ namespace Demo_web_MVC.Repository.Addresss
                     City = model.City,
                     Country = model.Country,
                     IsDefault = model.IsDefault,
+                    RecipientName = model.RecipientName,
+                    PhoneNumber = model.PhoneNumber,
                     CreatedAt = DateTime.UtcNow
                 };
                 if (model.IsDefault && existingDefaultAddress != null)
@@ -113,7 +119,8 @@ namespace Demo_web_MVC.Repository.Addresss
                 address.City = model.City;
                 address.Country = model.Country;
                 address.IsDefault = model.IsDefault;
-
+                address.RecipientName = model.RecipientName;
+                address.PhoneNumber = model.PhoneNumber;
 
                 await _context.SaveChangesAsync();
                 return true;
@@ -168,7 +175,9 @@ namespace Demo_web_MVC.Repository.Addresss
                     AddressLine = a.AddressLine,
                     City = a.City,
                     Country = a.Country,
-                    IsDefault = a.IsDefault
+                    IsDefault = a.IsDefault,
+                    RecipientName = a.RecipientName,
+                    PhoneNumber = a.PhoneNumber
                 }).FirstOrDefaultAsync();
             }
             catch (Exception ex)

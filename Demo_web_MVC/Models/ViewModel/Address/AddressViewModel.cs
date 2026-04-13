@@ -12,8 +12,9 @@
 
         public bool IsDefault { get; set; }
 
-        
+        public string RecipientName { get; set; } = null!;
+        public string PhoneNumber { get; set; } = null!;
 
-        
+
     }
 }

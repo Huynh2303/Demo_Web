@@ -1,4 +1,5 @@
-﻿using Demo_web_MVC.Models.ViewModel.Address;
+﻿using Demo_web_MVC.Models;
+using Demo_web_MVC.Models.ViewModel.Address;
 using Demo_web_MVC.Repository.Addresss;
 
 namespace Demo_web_MVC.Service.Address
@@ -50,13 +51,13 @@ namespace Demo_web_MVC.Service.Address
             }
             return await _addressRepository.UpdateAsync(userId, addressId, model);
         }
-        public async Task<bool> Delete(int userId, int addressId)
+        public async Task<bool> Delete( int addressId, int userId)
         {
             if (userId <= 0 || addressId <= 0)
             {
                 throw new ArgumentException("Invalid user ID or address ID.");
             }
-            return await _addressRepository.DeleteAsync(userId, addressId);
+            return await _addressRepository.DeleteAsync( addressId, userId );
         }
         public async Task<AddressViewModel?> GetDefaultAddress(int userId)
         {

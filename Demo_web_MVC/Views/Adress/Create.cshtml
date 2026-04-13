@@ -1,5 +1,63 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model Demo_web_MVC.Models.ViewModel.Address.AddressViewModel
+<link href="~/css/create-adress.css" rel="stylesheet" />
+
+
+<div  id="createAddressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content address-card">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    @(Model?.Id == 0 ? "Thêm địa chỉ mới" : "Cập nhật địa chỉ")
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                    <form asp-action="@(Model?.Id > 0 ? "Edit" : "Create")" asp-controller="Adress" method="post" class="address-form">
+                    <div class="form-group">
+                        <label asp-for="RecipientName"></label>
+                        <input asp-for="RecipientName" class="form-control" placeholder="Nhập tên người nhận"/>
+                        <span asp-validation-for="RecipientName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PhoneNumber"></label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="Nhập số điện thoại"/>
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="AddressLine"></label>
+                        <input asp-for="AddressLine" class="form-control" placeholder="Số nhà, tên đường"/>
+                        <span asp-validation-for="AddressLine" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="City"></label>
+                        <input asp-for="City" class="form-control" placeholder="Nhập thành phố"/>
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Country"></label>
+                        <input asp-for="Country" class="form-control" placeholder="Nhập quốc gia"/>
+                        <span asp-validation-for="Country" class="text-danger"></span>
+                    </div>
+                    <div class="form-checkbox">
+                        <input asp-for="IsDefault" id="defaultAddress"/>
+                        <label for="defaultAddress">Đặt làm địa chỉ mặc định</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Lưu địa chỉ</button>
+
+                        
+                        <a asp-action="Index" asp-controller="Adress" class="btn btn-secondary">Quay lại</a>
+                    </div>
+                </form>
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+<p>@Layout</p>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

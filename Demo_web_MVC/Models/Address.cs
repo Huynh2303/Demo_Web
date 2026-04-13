@@ -18,6 +18,7 @@ public partial class Address
     public bool IsDefault { get; set; }
 
     public DateTime CreatedAt { get; set; }
-
+    public string RecipientName { get; set; } = null!; 
+    public string PhoneNumber { get; set; } = null!;
     public virtual User User { get; set; } = null!;
 }
