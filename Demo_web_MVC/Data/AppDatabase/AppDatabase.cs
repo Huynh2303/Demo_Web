@@ -246,28 +246,28 @@ namespace Demo_web_MVC.Data.AppDatabase
                     .HasConstraintName("fk_orderlogs_order");
             });
 
-            modelBuilder.Entity<Payment>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("PK__Payments__3214EC07AE94A3CB");
+            //modelBuilder.Entity<Payment>(entity =>
+            //{
+            //    entity.HasKey(e => e.Id).HasName("PK__Payments__3214EC07AE94A3CB");
 
-                entity.HasIndex(e => e.OrderId, "idx_payments_orderid");
+            //    entity.HasIndex(e => e.OrderId, "idx_payments_orderid");
 
-                entity.Property(e => e.Amount).HasColumnType("decimal(12, 2)");
-                entity.Property(e => e.CreatedAt)
-                    .HasDefaultValueSql("(getdate())")
-                    .HasColumnType("datetime");
-                entity.Property(e => e.PaymentMethod)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.Status)
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasDefaultValue("pending");
+            //    entity.Property(e => e.Amount).HasColumnType("decimal(12, 2)");
+            //    entity.Property(e => e.CreatedAt)
+            //        .HasDefaultValueSql("(getdate())")
+            //        .HasColumnType("datetime");
+            //    entity.Property(e => e.PaymentMethod)
+            //        .HasMaxLength(50)
+            //        .IsUnicode(false);
+            //    entity.Property(e => e.Status)
+            //        .HasMaxLength(20)
+            //        .IsUnicode(false)
+            //        .HasDefaultValue("pending");
 
-                entity.HasOne(d => d.Order).WithMany(p => p.Payments)
-                    .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("fk_payments_order");
-            });
+            //    entity.HasOne(d => d.Order).WithMany(p => p.Payments)
+            //        .HasForeignKey(d => d.OrderId)
+            //        .HasConstraintName("fk_payments_order");
+            //});
 
             modelBuilder.Entity<Product>(entity =>
             {

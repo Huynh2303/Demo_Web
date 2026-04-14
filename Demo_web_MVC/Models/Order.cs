@@ -14,6 +14,7 @@ public partial class Order
     public string Status { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
+    public PaymentMethod PaymentMethod { get; set; } // COD / MoMo
 
     public virtual ICollection<FraudAnalysis> FraudAnalyses { get; set; } = new List<FraudAnalysis>();
 

@@ -9,7 +9,7 @@ public partial class Payment
 
     public int OrderId { get; set; }
 
-    public string PaymentMethod { get; set; } = null!;
+    public  PaymentMethod Method { get; set; } 
 
     public decimal Amount { get; set; }
 
