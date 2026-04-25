@@ -1,0 +1,60 @@
+﻿using Demo_web_MVC.Models;
+using Demo_web_MVC.Models.ViewModel.Product;
+using Demo_web_MVC.Models.ViewModel.Search;
+using Demo_web_MVC.Repository;
+using Demo_web_MVC.Repository.Search;
+using Newtonsoft.Json;
+using System.Net.Http;
+
+namespace Demo_web_MVC.Service.Search
+{
+    public class SearchService : ISearchService
+    {
+        private readonly ISearchReponsitory _searchReponsitory;
+        private readonly ILogger<SearchService> _logger;
+        private readonly IProductRepository _productRepository;
+        private readonly HttpClient _httpClient;
+
+        // Tiêm IHttpClientFactory thay vì HttpClient trực tiếp
+        public SearchService(ISearchReponsitory searchReponsitory,
+            ILogger<SearchService> logger,
+            IProductRepository productRepository,
+            IHttpClientFactory httpClientFactory) // Tiêm IHttpClientFactory
+        {
+            _searchReponsitory = searchReponsitory;
+            _logger = logger;
+            _productRepository = productRepository;
+            _httpClient = httpClientFactory.CreateClient("SearchService"); // Lấy HttpClient đã cấu hình từ IHttpClientFactory
+        }
+        public async Task<SearchViewModel> SearchAsync(string searchQuery)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                return new SearchViewModel
+                {
+                    SearchQuery = searchQuery,
+                    ProductVMResults = new List<ProductViewModel>(),
+                    
+                    SearchStatus = "NoResults",
+                    ErrorMessage = "Please enter a search query."
+                };
+            }
+            
+            var result = await _searchReponsitory.SearchAsync(searchQuery);
+            if (result == null || result.ProductVMResults == null || !result.ProductVMResults.Any())
+            {
+                result = new SearchViewModel
+                {
+                    SearchQuery = searchQuery,
+                    ProductVMResults = new List<ProductViewModel>(),
+                    
+                    SearchStatus = "NoResults",
+                    ErrorMessage = $"No results found for '{searchQuery}'. Please try a different search term."
+                };
+            }
+            
+            return result;
+        }
+        
+    }
+}

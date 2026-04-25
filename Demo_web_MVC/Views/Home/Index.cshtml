@@ -1,9 +1,53 @@
-﻿@* @{
-    ViewData["Title"] = "Home Page";
-}
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zapier Inspired Landing Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body style="background-color: #fffefb; color: #201515; font-family: 'Inter', sans-serif;">
+    <header style="position: fixed; top: 0; left: 0; right: 0; background-color: #fffefb;">
+        <div style="display: flex; justify-content: space-between; padding: 16px;">
+            <img src="zapier-logo.svg" alt="Zapier" style="height: 40px;">
+            <nav style="display: flex; gap: 24px;">
+                <a href="#" style="color: #201515; font-size: 16px;">Home</a>
+                <a href="#" style="color: #201515; font-size: 16px;">Features</a>
+                <a href="#" style="color: #201515; font-size: 16px;">Pricing</a>
+            </nav>
+            <button style="background-color: #ff4f00; color: #fffefb; border-radius: 4px; padding: 8px 16px; border: none;">
+                Start Free
+            </button>
+        </div>
+    </header>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
-<h1> xin chào huynh</h1> *@
+    <section id="hero" style="text-align: center; padding-top: 120px;">
+        <h1 style="font-size: 56px; font-weight: 500; color: #201515;">Welcome to Zapier</h1>
+        <p style="font-size: 20px; font-weight: 400; color: #36342e;">Automate your workflow effortlessly</p>
+        <button style="background-color: #ff4f00; color: #fffefb; border-radius: 4px; padding: 8px 16px; border: none;">
+            Get Started
+        </button>
+    </section>
+
+    <section id="features" style="padding: 80px 0; background-color: #fffefb;">
+        <h2 style="color: #201515; font-size: 48px;">Features</h2>
+        <div style="display: flex; justify-content: space-around; gap: 32px;">
+            <div style="background-color: #fffefb; padding: 24px; border-radius: 8px; border: 1px solid #c5c0b1;">
+                <h3 style="color: #201515; font-size: 24px;">Feature 1</h3>
+                <p style="color: #939084; font-size: 16px;">Description of feature 1.</p>
+            </div>
+            <div style="background-color: #fffefb; padding: 24px; border-radius: 8px; border: 1px solid #c5c0b1;">
+                <h3 style="color: #201515; font-size: 24px;">Feature 2</h3>
+                <p style="color: #939084; font-size: 16px;">Description of feature 2.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer style="background-color: #201515; color: #fffefb; padding: 40px 0;">
+        <div style="text-align: center;">
+            <p>&copy; 2026 Zapier. All rights reserved.</p>
+            <a href="#" style="color: #c5c0b1; font-size: 14px;">Privacy Policy</a>
+        </div>
+    </footer>
+</body>
+</html>

@@ -16,6 +16,7 @@ namespace Demo_web_MVC.Controllers
         public IActionResult Index()
         {
             return RedirectToAction("Index", "Product");
+            //return View();
         }
 
         public IActionResult Privacy()

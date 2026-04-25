@@ -4,7 +4,7 @@
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
 
     var isShopPage =
-        controller.Equals("Home", StringComparison.OrdinalIgnoreCase) ||
+        //controller.Equals("Home", StringComparison.OrdinalIgnoreCase) ||
         controller.Equals("Product", StringComparison.OrdinalIgnoreCase) ||
         controller.Equals("Cart", StringComparison.OrdinalIgnoreCase)||
         controller.Equals("Adress",StringComparison.OrdinalIgnoreCase);
@@ -37,8 +37,8 @@
                     <span class="shop-logo__text">MyShop</span>
                 </a>
                  
-                <form method="get" action="@Url.Action("Index", "Home")" class="shop-search">
-                    <input type="text" name="keyword" value="@keyword" placeholder="Tìm kiếm sản phẩm hot, deal đẹp..." />
+                <form asp-controller="Search" asp-action="Search"  method="get"  class="shop-search">
+                    <input type="text" name="searchQuery"  placeholder="Tìm kiếm sản phẩm hot, deal đẹp..." />
                     <button type="submit">Tìm kiếm</button>
                 </form>
 
@@ -63,7 +63,7 @@
         <header>
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
                 <div class="container-fluid">
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Demo_web_MVC</a>
+                    @* <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Demo_web_MVC</a> *@
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                             aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -128,11 +128,11 @@
             </main>
         </div>
 
-        <footer class="border-top footer text-muted">
+        @* <footer class="border-top footer text-muted">
             <div class="container">
                 &copy; 2026 - Demo_web_MVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
             </div>
-        </footer>
+        </footer> *@
     }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
