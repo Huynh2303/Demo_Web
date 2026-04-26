@@ -1,149 +1,261 @@
 ﻿@model List<Demo_web_MVC.Models.ViewModel.Product.ProductViewModel>
-@using System.Globalization
-@using System.Linq
 @using Demo_web_MVC.Models.ViewModel.Product
-@{
-    ViewData["Title"] = "Trang chủ";
+<!DOCTYPE html>
 
-    var currentPage = ViewBag.CurrentPage != null ? (int)ViewBag.CurrentPage : 1;
-    var totalPages = ViewBag.TotalPages != null ? (int)ViewBag.TotalPages : 1;
-    var keyword = ViewBag.Keyword != null ? ViewBag.Keyword.ToString() : "";
-    var cartCount = ViewBag.CartCount != null ? (int)ViewBag.CartCount : 0;
-}
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ASP.NET Commerce - Modern E-commerce</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="~/js/tailwind-config.js"></script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-base text-on-background min-h-screen flex flex-col">
+<!-- TopNavBar Component -->
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/home.css" />
-}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<div class="home-page">
-    
-
-    <main class="container main-content">
-        <!-- Banner -->
-        <section class="hero-banner">
-            <div class="hero-banner__content">
-                <span class="hero-banner__tag">Flash Sale</span>
-                <h1 class="hero-banner__title">Mua sắm trẻ trung, bắt trend và dễ lướt</h1>
-                <p class="hero-banner__desc">
-                    Khám phá những sản phẩm nổi bật với giao diện hiện đại, gọn gàng, dễ xem như feed mua sắm.
-                </p>
-
-                <div class="hero-banner__actions">
-                    <a href="@Url.Action("Index", "Product")" class="hero-btn hero-btn--primary">Mua ngay</a>
-                    <a href="#product-list" class="hero-btn hero-btn--secondary">Xem sản phẩm</a>
-                </div>
-            </div>
-
-            <div class="hero-banner__image-box">
-                <img src="@Url.Content("~/uploads/images/banner-home.jpg")" alt="Banner trang chủ" class="hero-banner__image" />
-            </div>
-        </section>
-
-        <!-- Product section -->
-        <section class="product-section" id="product-list">
-            <div class="section-heading">
-                <div>
-                    <h2>Sản phẩm nổi bật</h2>
-                    <p>Danh sách sản phẩm đang được hiển thị trên trang chủ</p>
-                </div>
-
-                <div class="section-heading__meta">
-                    @(Model != null ? Model.Count : 0) sản phẩm
-                </div>
-            </div>
-
-            <div class="product-grid">
-                @if (Model != null && Model.Any())
-                {
-                    @foreach (var item in Model)
-                    {
-                        var firstImage = item.imageUrl?.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
-                        var imagePath = !string.IsNullOrWhiteSpace(firstImage)
-                            ? Url.Content(firstImage)
-                            : Url.Content("~/uploads/images/no-image.jpg");
-
-                        var price = (item.Variants != null && item.Variants.Any())
-                            ? item.Variants.Min(v => v.Price)
-                            : 0m;
-
-                        var stock = (item.Variants != null && item.Variants.Any())
-                            ? item.Variants.Min(v=>v.Stock) : 0m;
-
-                        <article class="product-card">
-                            <div class="product-card__badge">Sale</div>
-
-                            <a href="@Url.Action("Details", "Product", new { id = item.Id })" class="product-card__link">
-                                <div class="product-card__image-wrap">
-                                    <img src="@imagePath"
-                                         alt="@item.Name"
-                                         class="product-card__image"
-                                         onerror="this.onerror=null;this.src='@Url.Content("~/uploads/images/no-image.jpg")';" />
-                                </div>
-
-                                <div class="product-card__body">
-                                    <h3 class="product-card__name" title="@item.Name">
-                                        @item.Name
-                                    </h3>
-
-                                    <div class="product-card__rating">
-                                        <span class="product-card__stars">★★★★★</span>
-                                        <span class="product-card__score">4.9</span>
-                                    </div>
-
-                                    <div class="product-card__bottom">
-                                        <div class="product-card__price">
-                                                     
-                                            @string.Format(new CultureInfo("vi-VN"), "{0:N0} ₫",price) 
-                                            
-                                        </div>
-                                    </div>
-                                    <!-- icon cart -->
-                                    @* <div>
-                                        <a href="@Url.Action("AddToCart", "Cart", new { userId = 1, variantId = item.VariantId, quantity = 1 })"class="cart-icon">
-                                            <i class="bi bi-cart3"></i>
-                                            <span class="cart-badge">3</span>
-                                        </a>
-                                    </div> *@
-                                    <div>
-                                        <a asp-action="DeleteConfirmed" asp-route-id="@item.Id">Delete</a>
-                                    </div>
-                                    <div>
-                                        @if (stock > 0)
-                                        {
-                                            <span class="product-card__stock">Còn @stock sản phẩm</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="product-card__stock product-card__stock--out">Hết hàng</span>
-                                        }
-                                    </div>
-                                </div>
-                            </a>
-                        </article>
-                    }
-                }
-                else
-                {
-                    <div class="empty-state">
-                        <p>Chưa có sản phẩm để hiển thị.</p>
-                    </div>
-                }
-            </div>
-
-            <!-- Pagination -->
-            <div class="pagination">
-                <a href="@Url.Action("Index", "Home", new { page = currentPage - 1, keyword = keyword })"
-                   class="pagination__btn @(currentPage <= 1 ? "disabled" : "")">
-                    Previous
-                </a>
-
-                <span class="pagination__info">Trang @currentPage / @totalPages</span>
-
-                <a href="@Url.Action("Index", "Home", new { page = currentPage + 1, keyword = keyword })"
-                   class="pagination__btn @(currentPage >= totalPages ? "disabled" : "")">
-                    Next
-                </a>
-            </div>
-        </section>
-    </main>
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8">
+<!-- Category Navigation -->
+<section class="py-lg overflow-hidden">
+<div class="flex items-center gap-lg overflow-x-auto no-scrollbar pb-xs">
+<div class="flex flex-col items-center gap-2 shrink-0 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="apparel">apparel</span>
 </div>
+<span class="text-label-bold font-label-bold uppercase">Shirts</span>
+</div>
+<div class="flex flex-col items-center gap-2 shrink-0 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="category">category</span>
+</div>
+<span class="text-label-bold font-label-bold uppercase">Pants</span>
+</div>
+<div class="flex flex-col items-center gap-2 shrink-0 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="ice_skating">ice_skating</span>
+</div>
+<span class="text-label-bold font-label-bold uppercase">Shoes</span>
+</div>
+<div class="flex flex-col items-center gap-2 shrink-0 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="watch">watch</span>
+</div>
+<span class="text-label-bold font-label-bold uppercase">Accessories</span>
+</div>
+<div class="flex flex-col items-center gap-2 shrink-0 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="laptop">laptop</span>
+</div>
+<span class="text-label-bold font-label-bold uppercase">Tech</span>
+</div>
+<div class="flex flex-col items-center gap-2 shrink-0 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="chair">chair</span>
+</div>
+<span class="text-label-bold font-label-bold uppercase">Furniture</span>
+</div>
+</div>
+</section>
+<!-- Banner Carousel -->
+<section class="mb-xl relative group overflow-hidden rounded-xl h-[400px]">
+<div class="absolute inset-0 bg-gradient-to-r from-slate-900/60 to-transparent z-10 flex flex-col justify-center px-lg md:px-xl">
+<span class="text-primary-container font-label-bold text-label-bold uppercase mb-2">New Season Arrivals</span>
+<h1 class="text-white font-display-lg text-display-lg mb-4 max-w-md">Minimalist Design For Modern Living</h1>
+<p class="text-white/80 text-body-base max-w-sm mb-6">Explore our curated collection of essential tech and apparel for the contemporary professional.</p>
+<button class="bg-primary-container text-white w-fit px-8 py-3 rounded-lg font-headline-md hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-primary-container/30">Shop Now</button>
+</div>
+<img class="w-full h-full object-cover" data-alt="Modern bright retail storefront with minimalist clothing displays and soft ambient window lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzjcJDKSjPJjyNESYG-T_lgFxUbSsiWs2o2yW0BEu2IBBnr1SeORK91aO3LaJPyLdYOSYwenkQ1n0DBl6YUE5qJxeNAfA-PhFw_RKVAZyBDG2JqbnOstJlJaIyEsrCw3DrYA0hYvw2EHw0VujWO7Tgs8F4YZyqZPt09hf6G0qzimbpvYJo9CpB0TLiv8Px5kamU7Euumv6BHJ_Q0oXQWh4WPBhVhlTyZP-pWIIS90DV6DAhMV7SKLRL-rBnDnvdlHkh19wO2ivrGkM"/>
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+<div class="w-2 h-2 rounded-full bg-white"></div>
+<div class="w-2 h-2 rounded-full bg-white/40"></div>
+<div class="w-2 h-2 rounded-full bg-white/40"></div>
+</div>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</section>
+<!-- Flash Sale Section -->
+<section class="mb-xl">
+<div class="flex items-center justify-between mb-lg">
+<div class="flex items-center gap-4">
+<h2 class="font-display-lg text-display-lg">Flash Sale</h2>
+<div class="flex items-center gap-2 bg-error-container text-on-error-container px-3 py-1 rounded-full text-label-bold font-label-bold">
+<span class="material-symbols-outlined text-sm" data-weight="fill">schedule</span>
+<span>08:24:55</span>
+</div>
+</div>
+<a class="text-primary-container font-label-bold flex items-center gap-1 hover:underline" href="#">View All <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-gutter">
+<!-- Flash Sale Item 1 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-3 aspect-square shadow-sm group-hover:shadow-lg transition-all duration-300">
+<span class="absolute top-2 left-2 bg-error text-white text-[10px] font-bold px-2 py-1 rounded-full z-10">-40%</span>
+<img alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Premium wireless over-ear headphones in matte black finish on a clean white surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6ZmAUkEw60tvAZRoLEKngE3X9E0oK3Zfi1J0r4E1cI_YEVteqg0e-K1OedhA5Zpe313oX5ieEHw9iuvB-EcLG1JXuUtXrfc-RFkFq99NrbcMsrHBpZfCK-wwJtFCcsOER7YeYs_Mwubnl921N_WfAjJXeKEB8AsDMAkL2KPvzTDqK36UghYgORDPzIy_XFP-1Y6jA0vZ6tiuLOtEPlUiR0PyDSkrL-PC1of9qnL_BVvjO8D9lawUSfGhRJGXL_EoP8Ksx-zhnhIl2"/>
+<div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<h3 class="text-body-sm font-medium mb-1 line-clamp-1">Premium Wireless Headphones</h3>
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-price-lg text-primary">$129.00</span>
+<span class="text-body-sm text-outline line-through">$199.00</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[75%] h-full bg-primary-container"></div>
+</div>
+<span class="text-[10px] text-outline mt-1 block">34 sold out of 50</span>
+</div>
+<!-- Flash Sale Item 2 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-3 aspect-square shadow-sm group-hover:shadow-lg transition-all duration-300">
+<span class="absolute top-2 left-2 bg-error text-white text-[10px] font-bold px-2 py-1 rounded-full z-10">-25%</span>
+<img alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Minimalist luxury wristwatch with white dial and leather strap against a soft grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkjLst7OMA_mxL0wy5adKzw9Zxk8A1OkofB01Psbr2ZMIqbCOKK1GLQa3WZ4b-Gzhx5l_WoT_PdNs_AQm5Nvl6_vY_nnS2wicneu-U09KFs84bHHVAmgOJP0fRDwju9X1ObOm85vBny1wgkHQ-u9ogvYrbadaEMP5cAPPOU4Tv_1kg8CRdpmusBKwJKX3csFu8ScrCjzMZCiYOm-WCOudO5VDlXLjjq8LGr7xnU4ivSdBCLfbvo8GfuXhGG_YSKs_A3d0MJRNlrQTd"/>
+</div>
+<h3 class="text-body-sm font-medium mb-1 line-clamp-1">Classic Minimalist Watch</h3>
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-price-lg text-primary">$85.00</span>
+<span class="text-body-sm text-outline line-through">$115.00</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[45%] h-full bg-primary-container"></div>
+</div>
+<span class="text-[10px] text-outline mt-1 block">12 sold out of 30</span>
+</div>
+<!-- Flash Sale Item 3 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-3 aspect-square shadow-sm group-hover:shadow-lg transition-all duration-300">
+<span class="absolute top-2 left-2 bg-error text-white text-[10px] font-bold px-2 py-1 rounded-full z-10">-50%</span>
+<img alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Vibrant red athletic running shoe with professional studio lighting on a neutral backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmTZCFr0FtUAjzUUEIhdPsi4WtUkyY1T_JI3x-8WY0chozKX0zEpHKJnFYWWpH5Xw9m6dOvRsgQ2yIH-umsM_81W-LzIE0EsF5nToMPS_OfD6HlTOWHNHFXMVW33qoqtDUe3Sml6pt9JGMGZJl2V2moBRM4yKgGT56GueJr34hyhb-fspoo5FIKervVAfXRkNG2I5aCSmLV2-OPfU1Lr4AUDHkuogKSVKvjGi5xDFc46RymiUpKowwcT7K_1DuoGKK8P9aDzAFdLcN"/>
+</div>
+<h3 class="text-body-sm font-medium mb-1 line-clamp-1">Performance Running Shoes</h3>
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-price-lg text-primary">$60.00</span>
+<span class="text-body-sm text-outline line-through">$120.00</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[90%] h-full bg-primary-container"></div>
+</div>
+<span class="text-[10px] text-outline mt-1 block">45 sold out of 50</span>
+</div>
+<!-- Flash Sale Item 4 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-3 aspect-square shadow-sm group-hover:shadow-lg transition-all duration-300">
+<span class="absolute top-2 left-2 bg-error text-white text-[10px] font-bold px-2 py-1 rounded-full z-10">-15%</span>
+<img alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Sleek silver smart speaker on a modern wooden desk with indoor plants in background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLR52cbjWNCmAHfJtyoxRmlqy15wocdF7xQ6bPvp390qLPpPZyTg0TtqBmwt_J4cX0xq8aBMkLf1d6WTt_T4w2Nf-gBXXrxYSTJQBcXWdv82OqsSf7Fn9ThPxS3REbtTJSelrW9K0x7_k_GqPJjlKW3o0YLiFOSTSDwna679KcA69Q5ajohz-eKi1upZrwqVZFxT4FjXbrSWYQ29CVLCjXtle8UBmUfneFqZ4Mh_TvmZQf0yn6vUPh-XIriFqyTQJKBBHEFHDe4nD7"/>
+</div>
+<h3 class="text-body-sm font-medium mb-1 line-clamp-1">Smart Home Speaker Gen 3</h3>
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-price-lg text-primary">$145.00</span>
+<span class="text-body-sm text-outline line-through">$170.00</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[20%] h-full bg-primary-container"></div>
+</div>
+<span class="text-[10px] text-outline mt-1 block">4 sold out of 20</span>
+</div>
+<!-- Flash Sale Item 5 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-3 aspect-square shadow-sm group-hover:shadow-lg transition-all duration-300">
+<span class="absolute top-2 left-2 bg-error text-white text-[10px] font-bold px-2 py-1 rounded-full z-10">-30%</span>
+<img alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Ergonomic leather office chair with chrome accents in a bright modern home office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgBq_g8ntQX_M6271viCuYHSBwC8I-SXdiMDJKW1mkw_qBSxwkF4rqkWwHHPqzFJVHfO4Cq702lQG1wE3uvDCk8P5C7lc55aOHR9hx3GUz66_SEqmivR4AOQXoS1WGhJ72KlpvkYnSoK1_mPo9kRJILjRRHgqKlP1pdziBybe4TicvLI5AQ38-mUnnIhvsAwmTUDRZd34QmUF1G1gMs4PWheiBDcwG6ZgmUUMoByj1mhzTx6ZKJQjxP55NHuw9sppuAKd3YioRcRhP"/>
+</div>
+<h3 class="text-body-sm font-medium mb-1 line-clamp-1">Executive Comfort Chair</h3>
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-price-lg text-primary">$210.00</span>
+<span class="text-body-sm text-outline line-through">$300.00</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[60%] h-full bg-primary-container"></div>
+</div>
+<span class="text-[10px] text-outline mt-1 block">9 sold out of 15</span>
+</div>
+</div>
+</section>
+<!-- Main Product List -->
+<section class="mb-xl">
+<div class="flex items-center justify-between mb-lg">
+<h2 class="font-display-lg text-display-lg">Recommended For You</h2>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-full border border-outline-variant text-body-sm font-medium hover:bg-surface-container transition-colors">Popular</button>
+<button class="px-4 py-2 rounded-full bg-primary-container text-white text-body-sm font-medium">Newest</button>
+</div>
+</div>
+<!-- Product list  -->
+ @Html.Partial("ProductList", Model) 
+</section> 
+<!-- Newsletter Section -->
+<section class="mb-xl bg-primary-container/10 rounded-3xl p-lg md:p-xl flex flex-col md:flex-row items-center justify-between gap-lg">
+<div class="max-w-md">
+<h2 class="font-display-lg text-display-lg text-on-primary-container mb-2">Join Our Newsletter</h2>
+<p class="text-on-primary-container/70 text-body-base">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
+</div>
+<div class="w-full max-w-sm flex gap-2">
+<input class="flex-1 rounded-lg border-none focus:ring-2 focus:ring-primary-container py-3 px-4" placeholder="Enter your email" type="email"/>
+<button class="bg-primary-container text-white px-6 py-3 rounded-lg font-label-bold uppercase">Join</button>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="bg-slate-50 dark:bg-slate-950 w-full mt-auto border-t border-slate-200 dark:border-slate-800">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-7xl mx-auto px-8 py-12">
+<!-- Brand Column -->
+<div class="flex flex-col gap-4">
+<span class="text-xl font-bold text-slate-900 dark:white">ASP.NET Commerce</span>
+<p class="text-slate-500 dark:text-slate-400 text-body-sm leading-relaxed">Your premium destination for the latest in technology, lifestyle, and modern essentials. Designed for the tech-savvy generation.</p>
+<div class="flex gap-4">
+<a class="text-slate-400 hover:text-sky-500 transition-colors" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="text-slate-400 hover:text-sky-500 transition-colors" href="#"><span class="material-symbols-outlined">hub</span></a>
+<a class="text-slate-400 hover:text-sky-500 transition-colors" href="#"><span class="material-symbols-outlined">chat</span></a>
+</div>
+</div>
+<!-- Links Column 1 -->
+<div class="flex flex-col gap-4">
+<span class="text-sky-500 dark:text-sky-400 font-label-bold text-label-bold uppercase">Customer Service</span>
+<nav class="flex flex-col gap-2">
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-500 hover:underline transition-colors text-sm" href="#">Contact Us</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-500 hover:underline transition-colors text-sm" href="#">Shipping Info</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-500 hover:underline transition-colors text-sm" href="#">Returns</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-500 hover:underline transition-colors text-sm" href="#">Help Center</a>
+</nav>
+</div>
+<!-- Links Column 2 -->
+<div class="flex flex-col gap-4">
+<span class="text-sky-500 dark:text-sky-400 font-label-bold text-label-bold uppercase">Company</span>
+<nav class="flex flex-col gap-2">
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-500 hover:underline transition-colors text-sm" href="#">About Us</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-500 hover:underline transition-colors text-sm" href="#">Privacy Policy</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-500 hover:underline transition-colors text-sm" href="#">Terms of Service</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-500 hover:underline transition-colors text-sm" href="#">Careers</a>
+</nav>
+</div>
+<!-- Contact Column -->
+<div class="flex flex-col gap-4">
+<span class="text-sky-500 dark:text-sky-400 font-label-bold text-label-bold uppercase">Contact Information</span>
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
+<span class="material-symbols-outlined text-sky-500">location_on</span>
+<span>123 Tech Avenue, Silicon Valley, CA</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
+<span class="material-symbols-outlined text-sky-500">mail</span>
+<span>support@aspnetcommerce.com</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
+<span class="material-symbols-outlined text-sky-500">call</span>
+<span>+1 (800) 123-4567</span>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-200 dark:border-slate-800 py-6 text-center">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-body-sm leading-relaxed">© 2024 ASP.NET Commerce. All rights reserved.</p>
+</div>
+</footer>
+</body></html>

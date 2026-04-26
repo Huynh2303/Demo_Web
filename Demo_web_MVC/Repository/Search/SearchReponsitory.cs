@@ -1,23 +1,26 @@
 ﻿using Demo_web_MVC.Data.AppDatabase;
+using Demo_web_MVC.Models;
 using Demo_web_MVC.Models.ViewModel.Category;
 using Demo_web_MVC.Models.ViewModel.Product;
 using Demo_web_MVC.Models.ViewModel.Search;
+using Demo_web_MVC.Repository.Paging;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 namespace Demo_web_MVC.Repository.Search
 {  
     public class SearchReponsitory:ISearchReponsitory
     {
-        public readonly AppDatabase _context;
-        public readonly ILogger<SearchReponsitory> _logger;
-        public readonly HttpClient _httpClient;
-        public SearchReponsitory(AppDatabase context, ILogger<SearchReponsitory> logger, HttpClient httpClient)
+        private readonly AppDatabase _context;
+        private readonly ILogger<SearchReponsitory> _logger;
+        private readonly IPagingReponsitory _pagingReponsitory;
+        public SearchReponsitory(AppDatabase context, ILogger<SearchReponsitory> logger,IPagingReponsitory pagingReponsitory)
         {
             _context = context;
             _logger = logger;
-            _httpClient = httpClient;
+           _pagingReponsitory = pagingReponsitory;
         }
-        public async Task<SearchViewModel> SearchAsync(string searchQuery)
+        public async Task<SearchViewModel> SearchAsync(string searchQuery, int? page = null, int pageSize = 10)
         {
             // Kiểm tra nếu searchQuery là null hoặc trống
             if (string.IsNullOrWhiteSpace(searchQuery))
@@ -29,8 +32,8 @@ namespace Demo_web_MVC.Repository.Search
                 };
             }
 
-            // Thực hiện tìm kiếm bất đồng bộ mà không sử dụng phân trang
-            var products = await _context.Products
+            // Tạo query tìm kiếm sản phẩm từ cơ sở dữ liệu
+            var query = _context.Products
                 .Where(p => p.Name.Contains(searchQuery) || (p.Description ?? "").Contains(searchQuery))
                 .Select(p => new ProductViewModel
                 {
@@ -47,23 +50,34 @@ namespace Demo_web_MVC.Repository.Search
                         Stock = v.Stock,
                         ImageUrlsVariants = v.ProductVariantImages.Select(pvi => pvi.Url).ToList() ?? new List<string>()
                     }).ToList()
-                })
-                .ToListAsync();  // Lấy toàn bộ kết quả tìm kiếm
+                });
 
-            // Tính tổng số sản phẩm (nếu cần để hiển thị số lượng kết quả)
-            var totalResults = products.Count;
+            // Nếu không yêu cầu phân trang, lấy tất cả kết quả
+            if (!page.HasValue)
+            {
+                var products = await query.ToListAsync();  // Lấy toàn bộ kết quả tìm kiếm
 
-            // Tạo ViewModel chứa kết quả tìm kiếm
-            var viewModel = new SearchViewModel
+                return new SearchViewModel
+                {
+                    SearchQuery = searchQuery,
+                    ProductVMResults = products,
+                    TotalResults = products.Count, // Tổng số kết quả tìm kiếm
+                    SearchStatus = "Success", // Trạng thái tìm kiếm thành công
+                    ErrorMessage = products.Any() ? null : "No results found for the search query." // Nếu không có kết quả, thông báo lỗi
+                };
+            }
+
+            // Nếu yêu cầu phân trang, gọi phương thức phân trang
+            var paginatedProducts = await _pagingReponsitory.GetPagedDataAsync(query, page.Value, pageSize);
+
+            return new SearchViewModel
             {
                 SearchQuery = searchQuery,
-                ProductVMResults = products,
-                TotalResults = totalResults, // Tổng số kết quả tìm kiếm
-                SearchStatus = "Success", // Trạng thái tìm kiếm thành công
-                ErrorMessage = products.Any() ? null : "No results found for the search query." // Nếu không có kết quả, thông báo lỗi
+                ProductVMResults = paginatedProducts.Items,  // Dữ liệu phân trang
+                TotalResults = paginatedProducts.TotalCount, // Tổng số kết quả
+                SearchStatus = "Success",
+                ErrorMessage = paginatedProducts.Items.Any() ? null : "No results found for the search query."
             };
-
-            return viewModel;
         }
 
     }

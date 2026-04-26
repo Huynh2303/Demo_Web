@@ -5,6 +5,7 @@ using Demo_web_MVC.Repository.Addresss;
 using Demo_web_MVC.Repository.Carts;
 using Demo_web_MVC.Repository.Category;
 using Demo_web_MVC.Repository.Oder;
+using Demo_web_MVC.Repository.Paging;
 using Demo_web_MVC.Repository.Payment;
 using Demo_web_MVC.Repository.Product;
 using Demo_web_MVC.Repository.Search;
@@ -25,6 +26,7 @@ using Microsoft.Extensions.FileProviders;
 using NETCore.MailKit.Core;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<IPagingReponsitory, PagingReponsitory>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<ISearchReponsitory, SearchReponsitory>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();

@@ -13,20 +13,49 @@ namespace Demo_web_MVC.Service.Search
         private readonly ISearchReponsitory _searchReponsitory;
         private readonly ILogger<SearchService> _logger;
         private readonly IProductRepository _productRepository;
-        private readonly HttpClient _httpClient;
+
 
         // Tiêm IHttpClientFactory thay vì HttpClient trực tiếp
         public SearchService(ISearchReponsitory searchReponsitory,
             ILogger<SearchService> logger,
-            IProductRepository productRepository,
-            IHttpClientFactory httpClientFactory) // Tiêm IHttpClientFactory
+            IProductRepository productRepository
+            ) // Tiêm IHttpClientFactory
         {
             _searchReponsitory = searchReponsitory;
             _logger = logger;
             _productRepository = productRepository;
-            _httpClient = httpClientFactory.CreateClient("SearchService"); // Lấy HttpClient đã cấu hình từ IHttpClientFactory
+
         }
-        public async Task<SearchViewModel> SearchAsync(string searchQuery)
+        //public async Task<SearchViewModel> SearchAsync(string searchQuery)
+        //{
+        //    if (string.IsNullOrWhiteSpace(searchQuery))
+        //    {
+        //        return new SearchViewModel
+        //        {
+        //            SearchQuery = searchQuery,
+        //            ProductVMResults = new List<ProductViewModel>(),
+
+        //            SearchStatus = "NoResults",
+        //            ErrorMessage = "Please enter a search query."
+        //        };
+        //    }
+
+        //    var result = await _searchReponsitory.SearchAsync(searchQuery);
+        //    if (result == null || result.ProductVMResults == null || !result.ProductVMResults.Any())
+        //    {
+        //        result = new SearchViewModel
+        //        {
+        //            SearchQuery = searchQuery,
+        //            ProductVMResults = new List<ProductViewModel>(),
+
+        //            SearchStatus = "NoResults",
+        //            ErrorMessage = $"No results found for '{searchQuery}'. Please try a different search term."
+        //        };
+        //    }
+
+        //    return result;
+        //}
+        public async Task<SearchViewModel> SearchAsync(string searchQuery, int? page = null, int pageSize = 10)
         {
             if (string.IsNullOrWhiteSpace(searchQuery))
             {
@@ -34,27 +63,24 @@ namespace Demo_web_MVC.Service.Search
                 {
                     SearchQuery = searchQuery,
                     ProductVMResults = new List<ProductViewModel>(),
-                    
-                    SearchStatus = "NoResults",
-                    ErrorMessage = "Please enter a search query."
+                    TotalResults = 0,
+                    SearchStatus = "Error",
+                    ErrorMessage = "Please enter a valid search query."
                 };
             }
-            
-            var result = await _searchReponsitory.SearchAsync(searchQuery);
+            var result = await _searchReponsitory.SearchAsync(searchQuery, page, pageSize);
             if (result == null || result.ProductVMResults == null || !result.ProductVMResults.Any())
             {
                 result = new SearchViewModel
                 {
                     SearchQuery = searchQuery,
                     ProductVMResults = new List<ProductViewModel>(),
-                    
+                    TotalResults = 0,
                     SearchStatus = "NoResults",
                     ErrorMessage = $"No results found for '{searchQuery}'. Please try a different search term."
                 };
             }
-            
             return result;
         }
-        
     }
 }

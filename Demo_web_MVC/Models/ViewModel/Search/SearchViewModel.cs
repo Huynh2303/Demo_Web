@@ -20,5 +20,6 @@ namespace Demo_web_MVC.Models.ViewModel.Search
         // Trạng thái tìm kiếm và lỗi (nếu có)
         public string? SearchStatus { get; set; }
         public string? ErrorMessage { get; set; }
+        public PagingInfo? PagingInfo { get; set; }
     }
 }
