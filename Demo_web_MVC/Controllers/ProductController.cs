@@ -23,10 +23,7 @@ namespace Demo_web_MVC.Controllers
         {
             return View(await _productService.getAll());
         }
-        public IActionResult Details(int id)
-        {
-            return View();
-        }
+       
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
@@ -39,6 +36,13 @@ namespace Demo_web_MVC.Controllers
             {
                 return NotFound("không tìm thấy sản phẩm");
             }
+            var allProducts = await _productService.getAll();
+
+            productDetails.RelatedProducts = allProducts
+                .Where(p => p.Id != id.Value)
+                .OrderBy(x => Guid.NewGuid()) // 🔥 random
+                .Take(4)
+                .ToList();
             return View(productDetails);
         }
         public async Task<IActionResult> Create()

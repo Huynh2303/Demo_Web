@@ -1,4 +1,5 @@
 ﻿@model List<Demo_web_MVC.Models.ViewModel.Carts.CartItemViewModel>
+
 @using System.Globalization
 
 @{
@@ -98,17 +99,17 @@
                         </div>
 
                         <div class="cart-item__total">
-                            <span id="itemTotal-@item.Id" class="item-total" data-total="@itemTotal">
+                            <span id="itemTotal-@item.Id" class="item-total !text-[#00B3F6] font-semibold" data-total="@itemTotal">
                                 @itemTotal.ToString("c0", culture)
                             </span>
                         </div>
 
                         <div class="cart-item__action">
-    <form asp-controller="Cart" asp-action="RemoveItem" method="post" style="display:inline;">
-        <input type="hidden" name="cartItemId" value="@item.Id" />
-        <button type="submit" class="delete-link">Xóa</button>
-    </form>
-</div>
+                            <form asp-controller="Cart" asp-action="RemoveItem" method="post" style="display:inline;">
+                                <input type="hidden" name="cartItemId" value="@item.Id" />
+                                <button type="submit" class="delete-link">Xóa</button>
+                            </form>
+                        </div>
                     </div>
                 }
             </div>
@@ -129,14 +130,16 @@
                         </div>
                         <div class="cart-summary__amount">
                             Tổng thanh toán:
-                            <strong class="cart-summary-total" id="selectedAmount">0 ₫</strong>
+                            <strong class=" text-[#00B3F6] font-bold" id="selectedAmount">0 ₫</strong>
                         </div>
                     </div>
 
-                    <a href="#" class="checkout-btn">Mua hàng</a>
+                    <a href="#" class=" bg-[#00B3F6] text-white px-5 py-3 rounded-lg font-semibold hover:bg-[#009ad1] transition">Mua hàng</a>
                 </div>
             </div>
+         
         }
+        
     </div>
 </div>
 

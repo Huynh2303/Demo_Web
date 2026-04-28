@@ -214,6 +214,12 @@ namespace Demo_web_MVC.Repository.Product
                 return false;
             }
         }
-
+        public async Task<int?> GetProductIdByVariantIdAsync(int variantId)
+        {
+            return await _context.ProductVariants
+                .Where(v => v.Id == variantId)
+                .Select(v => (int?)v.ProductId)
+                .FirstOrDefaultAsync();
+        }
     }
 }

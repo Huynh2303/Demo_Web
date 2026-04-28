@@ -1,8 +1,10 @@
 ﻿using Demo_web_MVC.Models;
 using Demo_web_MVC.Models.ViewModel.Carts;
 using Demo_web_MVC.Repository.Carts;
+using Demo_web_MVC.Service;
 using Demo_web_MVC.Service.Cart;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -13,12 +15,12 @@ namespace Demo_web_MVC.Controllers
     {
         public readonly ICartService _cartService;
         public readonly ILogger<CartController> _logger;
-
-        public CartController(ICartService cartService, ILogger<CartController> logger)
+        private readonly IProductService _productService;
+        public CartController(ICartService cartService, ILogger<CartController> logger,IProductService productService)
         {
             _cartService = cartService;
             _logger = logger;
-
+            _productService = productService;
         }
         private int? GetUserIdFromClaims()
         {
@@ -38,12 +40,12 @@ namespace Demo_web_MVC.Controllers
             }
             var cartItems = await _cartService.GetCartItems(userid.Value);
             ViewBag.CartCount = cartItems.Count;
-
+           
             return View(cartItems);
         }
         // Thêm sản phẩm vào giỏ hàng
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int variantId, int quantity)
+        public async Task<IActionResult> AddToCart (int variantId, int quantity)
         {
             try
             {
@@ -69,8 +71,12 @@ namespace Demo_web_MVC.Controllers
                 _logger.LogError(ex, "Lỗi khi thêm sản phẩm vào giỏ hàng.");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi xử lý yêu cầu.";
             }
-
-            return RedirectToAction("Detials", "Product"); // Điều hướng lại trang giỏ hàng
+            var productId = await _productService.GetProductIdByVariantIdAsync(variantId);
+            if (productId == null)
+            {
+                return RedirectToAction("Index", "Product");
+            }
+            return RedirectToAction("Details", "Product", new { id = productId }); // Điều hướng lại trang giỏ hàng
         }
 
         // Xóa sản phẩm khỏi giỏ hàng

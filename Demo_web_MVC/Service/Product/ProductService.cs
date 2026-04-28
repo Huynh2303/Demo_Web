@@ -44,5 +44,9 @@ namespace Demo_web_MVC.Service.Product
         {
             return await _productRepository.GetByIdAsync(id);
         }
+        public async Task<int?> GetProductIdByVariantIdAsync(int variantId)
+        {
+            return await _productRepository.GetProductIdByVariantIdAsync(variantId);
+        }
     }
 }

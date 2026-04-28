@@ -1,4 +1,6 @@
-﻿namespace Demo_web_MVC.Models.ViewModel.Carts
+﻿using Demo_web_MVC.Models.ViewModel.Product;
+
+namespace Demo_web_MVC.Models.ViewModel.Carts
 {
     public class CartItemViewModel
     {
@@ -13,5 +15,6 @@
         public string ?Color { get; set; }
         public decimal Price { get; set; }
         public string? ImageUrl { get; set; }
+        
     }
 }
