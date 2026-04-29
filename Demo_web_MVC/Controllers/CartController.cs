@@ -36,7 +36,8 @@ namespace Demo_web_MVC.Controllers
             var userid = GetUserIdFromClaims();
             if ( userid == null)
             {
-                return Unauthorized("Không xác định được người dùng.");
+                _logger.LogWarning("khong xac dinh duoc nguoi dung");
+                return RedirectToAction("Index", "Product");
             }
             var cartItems = await _cartService.GetCartItems(userid.Value);
             ViewBag.CartCount = cartItems.Count;

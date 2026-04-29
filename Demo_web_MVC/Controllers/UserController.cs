@@ -27,7 +27,6 @@ namespace Demo_web_MVC.Controllers
             _emailService = emailService;
 
         }
-
         public IActionResult Index()
         {
 
@@ -42,47 +41,58 @@ namespace Demo_web_MVC.Controllers
 
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Model không hợp lệ khi đăng ký.");
+                    return View(model);
+                }
 
-            if (await _context.Users.AnyAsync(x => x.Username == model.Username))
-            {
-                ModelState.AddModelError("Username", "Tên đã tồn tại!");
-                return View(model);
-            }
-            if (await _context.Users.AnyAsync(x => x.Email == model.Email))
-            {
-                ModelState.AddModelError("Email", "Email đã tồn tại!");
-                return View(model);
-            }
-            var role = await _context.Roles
-                .FirstAsync(r => r.Code == "CUSTOMER");
-            var user = new User
-            {
-                Username = model.Username!,
-                Email = model.Email!,
-                FullName = model.FullName,
-                IsActive = false,
-                CreatedAt = DateTime.UtcNow
-            };
-            var hasher = new PasswordHasher<User>();
-            user.PasswordHash = hasher.HashPassword(user, model.Password!);
-            var token = new UserToken();    
-            //using var transaction = await _context.Database.BeginTransactionAsync();
-            //try
-            //{
+                if (await _context.Users.AnyAsync(x => x.Username == model.Username))
+                {
+                    _logger.LogWarning($"Tên đăng nhập đã tồn tại: {model.Username}");
+                    ModelState.AddModelError("Username", "Tên đã tồn tại!");
+                    return View(model);
+                }
+
+                if (await _context.Users.AnyAsync(x => x.Email == model.Email))
+                {
+                    _logger.LogWarning($"Email đã tồn tại: {model.Email}");
+                    ModelState.AddModelError("Email", "Email đã tồn tại!");
+                    return View(model);
+                }
+
+                var role = await _context.Roles
+                    .FirstAsync(r => r.Code == "CUSTOMER");
+
+                var user = new User
+                {
+                    Username = model.Username!,
+                    Email = model.Email!,
+                    FullName = model.FullName,
+                    IsActive = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var hasher = new PasswordHasher<User>();
+                user.PasswordHash = hasher.HashPassword(user, model.Password!);
+
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
-                
+                _logger.LogInformation($"Người dùng {user.Username} đã được tạo thành công.");
+
                 var userRole = new UserRole
                 {
                     UserId = user.Id,
                     RoleId = role.Id
                 };
+
                 _context.UserRoles.Add(userRole);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation($"Phân quyền cho người dùng {user.Username} thành công.");
 
-                token = new UserToken
+                var token = new UserToken
                 {
                     UserId = user.Id,
                     Token = Guid.NewGuid().ToString(),
@@ -92,54 +102,73 @@ namespace Demo_web_MVC.Controllers
                 };
 
                 _context.userTokens.Add(token);
-
                 await _context.SaveChangesAsync();
-            //    await transaction.CommitAsync();
-            //}
-            //catch (Exception )
-            //{
-            //    await transaction.RollbackAsync();
-            //    _logger.LogError("Đăng ký không thành công");
-            //}
-            _ = Task.Run(async () =>
-            {
-                await _emailService.SendEmailAsync(
-                user.Email,
-                "Xác nhận tài khoản",
-                $"<a href='{Url.Action("Confirm", "User", new { token = token.Token }, Request.Scheme)}'>Xác nhận</a>"
-            );
-            });
+                _logger.LogInformation($"Token xác nhận email cho người dùng {user.Username} đã được tạo.");
 
-            return RedirectToAction("Login");
+                // Gửi email xác nhận tài khoản
+                _ = Task.Run(async () =>
+                {
+                    await _emailService.SendEmailAsync(
+                        user.Email,
+                        "Xác nhận tài khoản",
+                        $"<a href='{Url.Action("Confirm", "User", new { token = token.Token }, Request.Scheme)}'>Xác nhận</a>"
+                    );
+                    _logger.LogInformation($"Email xác nhận tài khoản đã được gửi đến {user.Email}");
+                });
+
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Đã xảy ra lỗi trong quá trình đăng ký tài khoản.");
+                return StatusCode(500, "Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.");
+            }
         }
 
         public async Task<IActionResult> Confirm(string token)
         {
-            if (string.IsNullOrEmpty(token))
+            try
             {
-                return BadRequest("Token không được để trống");
+                if (string.IsNullOrEmpty(token))
+                {
+                    _logger.LogWarning("Token không được để trống");
+                    return BadRequest("Token không được để trống");
+                }
+
+                var tokenEntity = await _context.userTokens
+                    .Include(t => t.User)
+                    .FirstOrDefaultAsync(t =>
+                        t.Token == token &&
+                        t.Type == TokenType.EmailConfirm &&
+                        !t.IsUsed &&
+                        t.ExpiredAt > DateTime.UtcNow
+                    );
+
+                if (tokenEntity == null)
+                {
+                    _logger.LogWarning($"Token không hợp lệ: {token}");
+                    return BadRequest("Token không hợp lệ");
+                }
+
+                // Xác thực email thành công
+                tokenEntity.User.IsActive = true;
+                tokenEntity.User.EmailConfirmedAt = DateTime.UtcNow;
+
+                tokenEntity.IsUsed = true;
+                tokenEntity.UsedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Xác thực email thành công cho người dùng: {tokenEntity.User.Username}");
+                return RedirectToAction("Login", "User");
             }
-            var tokenEntity = await _context.userTokens
-             .Include(t => t.User)
-             .FirstOrDefaultAsync(t =>
-                 t.Token == token &&
-                 t.Type == TokenType.EmailConfirm &&
-                 !t.IsUsed &&
-                 t.ExpiredAt > DateTime.UtcNow
-             );
-            if (tokenEntity == null)
-                return BadRequest("Token không hợp lệ");
-
-            tokenEntity.User.IsActive = true;
-            tokenEntity.User.EmailConfirmedAt = DateTime.UtcNow;
-
-            tokenEntity.IsUsed = true;
-            tokenEntity.UsedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Login", "User");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Đã xảy ra lỗi khi xác thực token email.");
+                return StatusCode(500, "Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.");
+            }
         }
-        
+
         public IActionResult Login()
         {
             return View();
@@ -147,112 +176,134 @@ namespace Demo_web_MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-            var input = model.UsernameOrEmail!.ToLower();
-            // 1. Tìm user trong DB
-            var user = await _context.Users
-                 .Include(u => u.UserRoles)
-                     .ThenInclude(ur => ur.Role)
-                 .FirstOrDefaultAsync(x =>
-                     x.Username == input ||
-                     x.Email == input);
 
-
-            if (user == null)
+            try
             {
-                ModelState.AddModelError("", "Sai tên đăng nhập hoặc mật khẩu");
-                return View(model);
-            }
-
-            if (!user.IsActive)
-            {
-                ModelState.AddModelError("", "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email");
-                return View(model);
-            }
-
-            // 2. Check lockout
-            if (user.LockoutUntil != null && user.LockoutUntil > DateTime.UtcNow)
-            {
-                ModelState.AddModelError("",
-                    $"Tài khoản bị khóa đến {user.LockoutUntil:HH:mm:ss}");
-                return View("Lockout");
-            }
-            
-            // 3. Verify password
-            var hasher = new PasswordHasher<User>();
-            var result = hasher.VerifyHashedPassword(
-                user,
-                user.PasswordHash,
-                model.Password!
-            );
-
-            // 4. Sai mật khẩu
-            if (result != PasswordVerificationResult.Success &&
-                result != PasswordVerificationResult.SuccessRehashNeeded)
-            {
-                user.FailedLoginCount++;
-
-                if (user.FailedLoginCount >= 3)
+                if (!ModelState.IsValid)
                 {
-                    user.LockoutUntil = DateTime.UtcNow.AddMinutes(5);
-                    user.FailedLoginCount = 0;
+                    _logger.LogWarning("Đăng nhập không hợp lệ do dữ liệu không hợp lệ.");
+                    return View(model);
                 }
+
+                var input = model.UsernameOrEmail!.ToLower();
+                // 1. Tìm user trong DB
+                var user = await _context.Users
+                     .Include(u => u.UserRoles)
+                         .ThenInclude(ur => ur.Role)
+                     .FirstOrDefaultAsync(x =>
+                         x.Username == input ||
+                         x.Email == input);
+
+                if (user == null)
+                {
+                    _logger.LogWarning($"Không tìm thấy người dùng với tên đăng nhập hoặc email: {input}");
+                    ModelState.AddModelError("", "Sai tên đăng nhập hoặc mật khẩu");
+                    return View(model);
+                }
+
+                if (!user.IsActive)
+                {
+                    _logger.LogWarning($"Tài khoản không kích hoạt: {input}");
+                    ModelState.AddModelError("", "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email");
+                    return View(model);
+                }
+
+                // 2. Check lockout
+                if (user.LockoutUntil != null && user.LockoutUntil > DateTime.UtcNow)
+                {
+                    _logger.LogWarning($"Tài khoản bị khóa: {input} đến {user.LockoutUntil:HH:mm:ss}");
+                    ModelState.AddModelError("",
+                        $"Tài khoản bị khóa đến {user.LockoutUntil:HH:mm:ss}");
+                    return View("Lockout");
+                }
+
+                // 3. Verify password
+                var hasher = new PasswordHasher<User>();
+                var result = hasher.VerifyHashedPassword(
+                    user,
+                    user.PasswordHash,
+                    model.Password!
+                );
+
+                // 4. Sai mật khẩu
+                if (result != PasswordVerificationResult.Success &&
+                    result != PasswordVerificationResult.SuccessRehashNeeded)
+                {
+                    user.FailedLoginCount++;
+
+                    if (user.FailedLoginCount >= 3)
+                    {
+                        user.LockoutUntil = DateTime.UtcNow.AddMinutes(5);
+                        user.FailedLoginCount = 0;
+                        _logger.LogWarning($"Tài khoản {input} bị khóa do nhập sai mật khẩu quá 3 lần.");
+                    }
+
+                    await _context.SaveChangesAsync();
+
+                    if (user.LockoutUntil != null && user.LockoutUntil > DateTime.UtcNow)
+                    {
+                        return View("Lockout");
+                    }
+
+                    _logger.LogWarning($"Sai tên đăng nhập hoặc mật khẩu cho {input}");
+                    ModelState.AddModelError("", "Sai tên đăng nhập hoặc mật khẩu");
+                    return View(model);
+                }
+
+                // 5. Đăng nhập thành công → reset lockout
+                user.FailedLoginCount = 0;
+                user.LockoutUntil = null;
                 await _context.SaveChangesAsync();
 
+                var roleCode = user.UserRoles
+                       .Select(ur => ur.Role.Code)
+                       .FirstOrDefault();
 
-                if (user.LockoutUntil != null && user.LockoutUntil > DateTime.UtcNow)
-                    return View("Lockout");
+                if (roleCode == null)
+                {
+                    _logger.LogWarning($"Tài khoản {input} chưa được phân quyền.");
+                    ModelState.AddModelError("", "Tài khoản chưa được phân quyền");
+                    return View(model);
+                }
 
-                ModelState.AddModelError("", "Sai tên đăng nhập hoặc mật khẩu");
-                return View(model);
+                // 6. Sign in
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim("FullName", user.FullName ?? ""),
+                };
+
+                foreach (var role in user.UserRoles.Select(ur => ur.Role.Code))
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+
+                var identity = new ClaimsIdentity(
+                    claims,
+                    CookieAuthenticationDefaults.AuthenticationScheme
+                );
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity)
+                );
+
+                // Ghi lại các claims khi đăng nhập thành công
+                foreach (var claim in principal.Claims)
+                {
+                    _logger.LogInformation("Claim Type: {Type}, Value: {Value}", claim.Type, claim.Value);
+                }
+
+                _logger.LogInformation($"Đăng nhập thành công cho người dùng: {input}");
+                return RedirectToAction("Index", "Home");
             }
-
-            // 5. Đăng nhập thành công → reset lockout
-            user.FailedLoginCount = 0;
-            user.LockoutUntil = null;
-
-            await _context.SaveChangesAsync();
-
-            var roleCode = user.UserRoles
-                   .Select(ur => ur.Role.Code)
-                   .FirstOrDefault();
-            if (roleCode == null)
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", "Tài khoản chưa được phân quyền");
-                return View(model);
+                _logger.LogError(ex, "Đã xảy ra lỗi trong quá trình đăng nhập.");
+                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng nhập, vui lòng thử lại sau.");
+                return View(model); // Trang lỗi chung khi có exception xảy ra
             }
-            // 6. Sign in
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim("FullName", user.FullName ?? ""),
-                //new Claim(ClaimTypes.Role, roleCode)
-            };
-            foreach (var role in user.UserRoles.Select(ur => ur.Role.Code))
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-                
-            var identity = new ClaimsIdentity(
-                claims,
-                CookieAuthenticationDefaults.AuthenticationScheme
-            );
-            var principal = new ClaimsPrincipal(identity);
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identity)
-                
-            );
-            foreach (var claim in principal.Claims)
-            {
-                _logger.LogInformation("Claim Type: {Type}, Value: {Value}", claim.Type, claim.Value);
-            }
-
-
-
-            return RedirectToAction("Index", "Home");
         }
         public IActionResult ForgotPassword()
         {
@@ -262,48 +313,68 @@ namespace Demo_web_MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(string email)
         {
-            if (string.IsNullOrEmpty(email))
-                return View();
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email);
+            try
+            {
+                if (string.IsNullOrEmpty(email))
+                {
+                    _logger.LogWarning("Tham số email trống hoặc null.");
+                    return View();
+                }
 
-            if (user == null)
-                return View("ForgotPasswordConfirmation");
-            if (!user.IsActive)
-            {  
-                
-                return View("ForgotPasswordConfirmation");
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email == email);
 
+                if (user == null)
+                {
+                    _logger.LogWarning($"Không tìm thấy người dùng với email: {email}");
+                    return View("ForgotPasswordConfirmation");
+                }
+
+                if (!user.IsActive)
+                {
+                    _logger.LogWarning($"Người dùng với email {email} không hoạt động.");
+                    return View("ForgotPasswordConfirmation");
+                }
+
+                if (user.UpdatedAt > DateTime.UtcNow.AddMinutes(-5))
+                {
+                    _logger.LogWarning($"Người dùng với email {email} đã yêu cầu mật khẩu mới trong vòng 5 phút qua.");
+                    return View("ForgotPasswordConfirmation");
+                }
+
+                // 1. Sinh mật khẩu mới
+                string newPassword = GeneratePassword(10);
+
+                // 2. Hash và cập nhật mật khẩu
+                var hasher = new PasswordHasher<User>();
+                user.PasswordHash = hasher.HashPassword(user, newPassword);
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                // 3. Gửi email với mật khẩu mới
+                await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Mật khẩu mới của bạn",
+                    $@"
+                    <p>Xin chào {user.FullName},</p>
+                    <p>Với tài khoản {user.Username} và Email là : {user.Email}</p>
+                    <p>Bạn đã yêu cầu đặt lại mật khẩu. </p>
+                    <p>Mật khẩu mới của bạn là:</p>
+                    <h3>{newPassword}</h3>
+                    <p>Vui lòng đăng nhập và đổi mật khẩu ngay.</p>
+                    "
+                );
+
+                _logger.LogInformation($"Mật khẩu mới đã được gửi thành công tới email {email}.");
+                return RedirectToAction("Login", "User");
             }
-            if (user.UpdatedAt > DateTime.UtcNow.AddMinutes(-5))
-                return View("ForgotPasswordConfirmation");
-            
-
-            // 1. Sinh password mới
-            string newPassword = GeneratePassword(10);
-
-            // 2. Hash & update
-            var hasher = new PasswordHasher<User>();
-            user.PasswordHash = hasher.HashPassword(user, newPassword);
-            user.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            // 3. Gửi mail password mới
-            await _emailService.SendEmailAsync(
-                user.Email,
-                "Mật khẩu mới của bạn",
-                $@"
-                <p>Xin chào {user.FullName},</p>
-                <p>với tài khoản {user.Username} và Email là : {user.Email}</p>
-                <p>Bạn đã yêu cầu đặt lại mật khẩu. </p>
-                <p>Mật khẩu mới của bạn là:</p>
-                <h3>{newPassword}</h3>
-                <p>Vui lòng đăng nhập và đổi mật khẩu ngay.</p>
-                "
-            );
-            return RedirectToAction("Login", "User");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Đã xảy ra lỗi trong quá trình xử lý yêu cầu quên mật khẩu.");
+                return View("Error"); // Trang lỗi chung khi có exception xảy ra
+            }
         }
         public static string GeneratePassword(int length = 10)
         {
@@ -335,7 +406,7 @@ namespace Demo_web_MVC.Controllers
         {
             if (!ModelState.IsValid)
             {
-               
+                _logger.LogWarning("ChangePassword failed. ModelState is invalid.");
                 return View(model);
 
             }
@@ -343,11 +414,21 @@ namespace Demo_web_MVC.Controllers
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userId == null) 
-                return Unauthorized();
-            var user = await _context.Users.FindAsync(int.Parse(userId));
-            if (user == null) 
+            if (userId == null)
+            {
+                _logger.LogWarning("User not authenticated. UserId is null.");
                 return NotFound();
+
+            }
+
+                
+            var user = await _context.Users.FindAsync(int.Parse(userId));
+            if (user == null)
+            {
+                _logger.LogWarning($"User not found for UserId: {userId}");
+                return NotFound();
+            }
+                
             var verify = hasher.VerifyHashedPassword(
                     user,
                     user.PasswordHash,
@@ -356,11 +437,13 @@ namespace Demo_web_MVC.Controllers
 
             if (verify == PasswordVerificationResult.Failed)
             {
+                _logger.LogWarning($"Password verification failed for UserId: {userId}");
                 ModelState.AddModelError("", "Mật khẩu hiện tại không đúng");
                 return View(model);
             }
             if (model.OldPassword == model.NewPassword)
             {
+                _logger.LogWarning($"New password is the same as the old password for UserId: {userId}");
                 ModelState.AddModelError("", "Mật khẩu mới phải khác mật khẩu hiện tại");
                 return View(model);
             }
@@ -368,7 +451,8 @@ namespace Demo_web_MVC.Controllers
             user.PasswordHash = hasher.HashPassword(user, model.NewPassword!);
                 user.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Home");
+            _logger.LogInformation($"Password changed successfully for UserId: {userId}");
+            return RedirectToAction("Index", "Home");
         }
 
     }

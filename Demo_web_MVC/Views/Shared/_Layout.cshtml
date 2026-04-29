@@ -8,8 +8,9 @@
         //controller.Equals("Home", StringComparison.OrdinalIgnoreCase) ||
         controller.Equals("Product", StringComparison.OrdinalIgnoreCase) ||
         controller.Equals("Cart", StringComparison.OrdinalIgnoreCase) ||
+        controller.Equals("Search", StringComparison.OrdinalIgnoreCase) ||
         controller.Equals("Adress", StringComparison.OrdinalIgnoreCase);
-
+        
     var keyword = ViewBag.Keyword != null ? ViewBag.Keyword.ToString() : "";
     var cartCount = ViewBag.CartCount != null ? (int)ViewBag.CartCount : 0;
     
@@ -87,6 +88,8 @@
                         
                         <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90">
                             <span class="material-symbols-outlined" data-icon="person">person</span>
+                            @* <partial name="_MenuManagePartial" /> *@
+                            
                         </button>
                     </div>
                 </div>
@@ -104,34 +107,63 @@
     }
     else
     {
+        
         <!-- Navbar mặc định cho trang không phải shop -->
-        <header>
-            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-                <div class="container-fluid">
-                    @* <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Demo_web_MVC</a> *@
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                            aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
+        <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 shadow-lg shadow-black/5">
+            <div class="flex flex-col w-full max-w-7xl mx-auto px-4 md:px-8 py-3">
+                <div class="flex items-center justify-between gap-gutter">
+                    <!-- Brand -->
+                    <a class="text-2xl font-black text-sky-500 dark:text-sky-400 shrink-0" href="/">ASP.NET Commerce</a>
 
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                        <ul class="navbar-nav flex-grow-1">
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="UpdateRole">UpdateRole</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                            </li>
-                        </ul>
+                    <!-- Search Bar -->
+                    <div class="hidden md:flex flex-1 max-w-2xl px-gutter">
+                        <div class="relative w-full group">
+                            <form asp-controller="Search" asp-action="Index" method="get">
+                                <input name="searchQuery" class="w-full bg-surface-container-low border-outline-variant rounded-lg py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all outline-none" placeholder="Search products..." type="text" />
+                                <button class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</button>
+                            </form>
+                        </div>
+                    </div>
 
-                        <partial name="_LoginPartial" />
-                        <partial name="_MenuManagePartial" />
+                    <!-- Actions (Login, Cart, Profile) -->
+                    <div class="flex items-center gap-sm md:gap-lg">
+                        <!-- Cart Button -->
+                        <form asp-controller="Cart" asp-action="Index" method="post">
+                            <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90 relative">
+                                <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                                <span class="absolute top-1 right-1 w-4 h-4 bg-primary-container text-white text-[10px] flex items-center justify-center rounded-full">@cartCount</span>
+                            </button>
+                        </form>
+
+                        <!-- Login/Register Buttons for Non-Authenticated Users -->
+                        @if (!User.Identity!.IsAuthenticated)
+                        {
+                            <div class="flex gap-2">
+                                <form asp-controller="User" asp-action="Login" method="get">
+                                    <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90">
+                                        <span class="ml-2">Đăng nhập</span>
+                                    </button>
+                                </form>
+                                <form asp-controller="User" asp-action="Register" method="get">
+                                    <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90">
+                                        <span class="ml-2">Đăng ký</span>
+                                    </button>
+                                </form>
+                            </div>
+                        }
+
+                        <!-- User Profile (After Login) -->
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90">
+                                <span class="material-symbols-outlined" data-icon="person">person</span>
+                            </button>
+                        }
                     </div>
                 </div>
-            </nav>
+
+                
+            </div>
         </header>
     }
 
