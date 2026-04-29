@@ -1,4 +1,5 @@
-﻿@{
+﻿
+@{
     var title = ViewData["Title"] ?? "Demo_web_MVC";
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
@@ -11,6 +12,7 @@
 
     var keyword = ViewBag.Keyword != null ? ViewBag.Keyword.ToString() : "";
     var cartCount = ViewBag.CartCount != null ? (int)ViewBag.CartCount : 0;
+    
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -54,21 +56,26 @@
                     <!-- Brand -->
                     <a class="text-2xl font-black text-sky-500 dark:text-sky-400 shrink-0" href="/">ASP.NET Commerce</a>
                     <!-- Search Bar -->
-                    <div class="hidden md:flex flex-1 max-w-2xl px-gutter">
-                        <div class="relative w-full group">
-                            <input class="w-full bg-surface-container-low border-outline-variant rounded-lg py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all outline-none" placeholder="Search products..." type="text" />
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                    
+                        <div class="hidden md:flex flex-1 max-w-2xl px-gutter">
+                            <div class="relative w-full group">
+                                <form asp-controller="Search" asp-action="Index" method="get">
+                                    <input name="searchQuery" class="w-full bg-surface-container-low border-outline-variant rounded-lg py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all outline-none" placeholder="Search products..." type="text" />
+                                    <button class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    
+                    
                     <!-- Actions -->
                     <div class="flex items-center gap-sm md:gap-lg">
-                        @* <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90">
-                            <span class="material-symbols-outlined" data-icon="favorite">favorite</span>
-                        </button> *@
-                        <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90 relative">
-                            <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
-                            <span class="absolute top-1 right-1 w-4 h-4 bg-primary-container text-white text-[10px] flex items-center justify-center rounded-full">3</span>
-                        </button>
+                        <form asp-controller="Cart" asp-action="Index"  method="post">
+                            <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90 relative">
+                                <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                                <span class="absolute top-1 right-1 w-4 h-4 bg-primary-container text-white text-[10px] flex items-center justify-center rounded-full">@cartCount</span>
+                            </button>
+                        </form>
+                        
                         <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-all active:scale-90">
                             <span class="material-symbols-outlined" data-icon="person">person</span>
                         </button>

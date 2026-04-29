@@ -8,7 +8,7 @@
     {
         
    var imagePath = item.imageUrl != null && item.imageUrl.Any()
-        ? item.imageUrl.First()
+        ? item.imageUrl.First() 
         : Url.Content("~/uploads/images/no-image.jpg");
 
     var price = item.Variants != null && item.Variants.Any()

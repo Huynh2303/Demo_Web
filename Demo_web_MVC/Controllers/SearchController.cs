@@ -17,56 +17,15 @@ namespace Demo_web_MVC.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        
+
+        public async Task<IActionResult> Index(string searchQuery, int? page = 1)
         {
-            return View();
-        }
-        //[HttpGet]
-        //public async Task<IActionResult> Search(string searchQuery)
-        //{
-        //    
-        //    _logger.LogInformation("Search started for query: {SearchQuery}", searchQuery);
+            _logger.LogInformation("Start search operation with query: {SearchQuery} and page: {Page}", searchQuery, page);
 
-        //    if (string.IsNullOrWhiteSpace(searchQuery))
-        //    {
-        //        // Log khi không có query đầu vào
-        //        _logger.LogWarning("Search query is empty or whitespace.");
-
-        //        ModelState.AddModelError(string.Empty, "Please enter a search query.");
-        //        return View("Index", new SearchViewModel { ErrorMessage = "Please enter a search query." });
-        //    }
-
-        //    var ProductVMResults = await _searchService.SearchAsync(searchQuery);
-
-        //    // Log kết quả tìm kiếm
-        //    if (ProductVMResults?.ProductVMResults?.Any() != true)
-        //    {
-        //        _logger.LogInformation("No results found for query: {SearchQuery}", searchQuery);
-        //    }
-        //    else
-        //    {
-        //        _logger.LogInformation("{ResultsCount} results found for query: {SearchQuery}", ProductVMResults.ProductVMResults.Count(), searchQuery);
-        //    }
-
-        //    var viewModel = new SearchViewModel
-        //    {
-        //        SearchQuery = searchQuery,
-        //        ProductVMResults = ProductVMResults?.ProductVMResults ?? new List<ProductViewModel>(),
-        //        ErrorMessage = ProductVMResults?.ProductVMResults?.Any() != true ? "No results found." : null
-        //    };
-
-        //    // Log khi trả về kết quả
-        //    _logger.LogInformation("Returning results for query: {SearchQuery}", searchQuery);
-
-        //    return View("Index", viewModel);
-        //}
-        [HttpGet]
-        public async Task<IActionResult> Search(string searchQuery, int? page = 1)
-        {
-            int pageSize = 1;  // Số sản phẩm mỗi trang
-
-            // Gọi phương thức SearchAsync để tìm kiếm và phân trang
+            int pageSize = 20;  // Số sản phẩm mỗi trang
             var result = await _searchService.SearchAsync(searchQuery, page, pageSize);
+
             // Tạo đối tượng PagingInfo và gán thông tin phân trang
             result.PagingInfo = new PagingInfo
             {
@@ -75,6 +34,8 @@ namespace Demo_web_MVC.Controllers
                 TotalItems = result.TotalResults,
                 TotalPages = (int)Math.Ceiling((decimal)result.TotalResults / pageSize)
             };
+
+            _logger.LogInformation("Found {TotalResults} results for query: {SearchQuery} on page: {Page}", result.TotalResults, searchQuery, page);
 
             // Trả về view với kết quả tìm kiếm
             return View(result);

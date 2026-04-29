@@ -60,6 +60,7 @@ namespace Demo_web_MVC.Controllers
                 if (result)
                 {
                     TempData["SuccessMessage"] = "Sản phẩm đã được thêm vào giỏ hàng.";
+                    
                 }
                 else
                 {
@@ -76,6 +77,7 @@ namespace Demo_web_MVC.Controllers
             {
                 return RedirectToAction("Index", "Product");
             }
+            
             return RedirectToAction("Details", "Product", new { id = productId }); // Điều hướng lại trang giỏ hàng
         }
 
