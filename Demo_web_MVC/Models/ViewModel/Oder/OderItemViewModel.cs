@@ -1,4 +1,7 @@
-﻿namespace Demo_web_MVC.Models.ViewModel.Oder
+﻿using Demo_web_MVC.Models.ViewModel.Carts;
+using Demo_web_MVC.Models.ViewModel.Product;
+
+namespace Demo_web_MVC.Models.ViewModel.Oder
 {
     public class OderItemViewModel
     {
@@ -10,5 +13,9 @@
         public decimal Price { get; set; }
 
         public int Quantity { get; set; }
+        
+        public string? Name { get; set; }
+
+       public string? Img { get; set; }
     }
 }

@@ -11,7 +11,7 @@ public partial class Order
 
     public decimal TotalAmount { get; set; }
 
-    public string Status { get; set; } = null!;
+    //public string Status { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
     public PaymentMethod PaymentMethod { get; set; } // COD / MoMo
@@ -25,4 +25,5 @@ public partial class Order
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual User User { get; set; } = null!;
+    public OrderStatus Status { get; set; }
 }

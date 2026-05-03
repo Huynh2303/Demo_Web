@@ -196,9 +196,8 @@ namespace Demo_web_MVC.Data.AppDatabase
                     .HasDefaultValueSql("(getdate())")
                     .HasColumnType("datetime");
                 entity.Property(e => e.Status)
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasDefaultValue("pending");
+                    .HasConversion<int>()          // 🔥 QUAN TRỌNG
+                    .HasDefaultValue(OrderStatus.Pending);
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(12, 2)");
 
                 entity.HasOne(d => d.User).WithMany(p => p.Orders)
