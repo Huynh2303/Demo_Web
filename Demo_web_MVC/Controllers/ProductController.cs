@@ -14,13 +14,17 @@ namespace Demo_web_MVC.Controllers
     {
         public readonly IProductService _productService;
         public readonly ICategoryService _categoryService;
-        public ProductController(IProductService productService, ICategoryService categoryService)
+        private readonly ILogger<ProductController> _logger;
+        public ProductController(IProductService productService, ICategoryService categoryService,ILogger<ProductController> logger)
         {
             _productService = productService;
             _categoryService = categoryService;
+            _logger = logger;
         }
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
+            _logger.LogInformation("Index action is being executed.");
             return View(await _productService.getAll());
         }
        

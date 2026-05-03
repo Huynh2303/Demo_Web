@@ -1,0 +1,257 @@
+﻿@* <!DOCTYPE html>
+
+<html lang="vi">
+    <head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#454747",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "outline": "#6e7881",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-error-container": "#93000a",
+                        "background": "#f5faff",
+                        "surface-bright": "#f5faff",
+                        "outline-variant": "#bdc8d1",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "primary-fixed": "#c6e7ff",
+                        "on-tertiary-fixed": "#2d1600",
+                        "surface-dim": "#d6dae0",
+                        "surface-container-high": "#e4e9ee",
+                        "on-surface": "#171c20",
+                        "inverse-primary": "#82cfff",
+                        "on-primary-fixed-variant": "#004c6b",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#2c3135",
+                        "surface-tint": "#00658d",
+                        "primary-fixed-dim": "#82cfff",
+                        "on-primary-fixed": "#001e2d",
+                        "surface": "#f5faff",
+                        "on-background": "#171c20",
+                        "surface-container-highest": "#dee3e8",
+                        "primary": "#00658d",
+                        "on-error": "#ffffff",
+                        "surface-container": "#eaeef4",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-surface-variant": "#3e4850",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "on-tertiary-container": "#572f00",
+                        "on-secondary-container": "#616363",
+                        "on-primary-container": "#003e58",
+                        "surface-container-low": "#eff4fa",
+                        "tertiary-container": "#ea8c21",
+                        "secondary-container": "#dfe0e0",
+                        "primary-container": "#00aeef",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc0",
+                        "surface-variant": "#dee3e8",
+                        "secondary": "#5d5f5f",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#ecf1f7",
+                        "tertiary": "#8d4f00",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "xl": "48px",
+                        "gutter": "16px",
+                        "container-max": "1200px"
+                    },
+                    "fontFamily": {
+                        "price-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Be Vietnam Pro"],
+                        "display-lg": ["Be Vietnam Pro"],
+                        "body-sm": ["Be Vietnam Pro"],
+                        "label-bold": ["Be Vietnam Pro"],
+                        "body-base": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "price-lg": ["24px", {"lineHeight": "1", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-bold": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+
+    @* Mock Data Setup for Demonstration *@
+    @{
+        /*
+        var mockAddresses = new List<address> {
+            new Address { Id = 1, Name = "Nguyễn Văn A", Phone = "0901234567", Detail = "123 Đường ABC, Phường 4", City = "Quận Tân Bình, TP.HCM", IsDefault = true },
+            new Address { Id = 2, Name = "Nguyễn Văn A (Văn phòng)", Phone = "0901234567", Detail = "Tòa nhà Vibrant, 456 Đường XYZ", City = "Quận 1, TP.HCM", IsDefault = false }
+        };
+        var mockCartItems = new List<cartitem> {
+            new CartItem { ProductId = 101, ProductName = "Smartphone Ultra V1", Quantity = 1, Price = 15000000, ImageUrl = "image-phone.jpg" },
+            new CartItem { ProductId = 102, ProductName = "Tai nghe Wireless Bass Pro", Quantity = 2, Price = 1200000, ImageUrl = "image-buds.jpg" }
+        };
+        var mockModel = new CheckoutViewModel {
+            Addresses = mockAddresses,
+            CartItems = mockCartItems,
+            TotalAmount = 17400000
+        };
+        */
+    }
+
+    
+<main class="max-w-[1200px] mx-auto px-gutter py-xl">
+<div class="flex flex-col md:flex-row gap-lg">
+<!-- Left Column: Order Details -->
+<div class="flex-1 space-y-lg">
+<!-- Shipping Address Section -->
+<section class="bg-white rounded-xl p-lg shadow-black/5 shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20">
+<div class="flex items-center gap-sm mb-md text-primary">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<h2 class="font-headline-md text-headline-md">Địa Chỉ Nhận Hàng</h2>
+</div>
+<div class="space-y-md">
+                        @foreach (var address in Model.Addresses) {
+                        <label "border-outline-variant")"="" 20"="" :="" bg-primary-fixed="" border-primary-container="" class="relative flex items-start p-md border rounded-lg cursor-pointer transition-all hover:border-primary-container @(address.IsDefault ?">
+<input "")="" "checked"="" :="" ?="" @(address.isdefault="" class="mt-1 text-primary focus:ring-primary h-4 w-4 border-gray-300" name="selectedAddressId" type="radio" value="@address.Id"/>
+<div class="ml-md flex-1">
+<div class="flex items-center gap-sm">
+<span class="font-label-bold text-body-base text-on-surface">@address.Name | @address.Phone</span>
+                                    @if (address.IsDefault) {
+                                        <span class="bg-primary text-white text-[10px] px-2 py-0.5 rounded-sm uppercase font-bold tracking-wider">Mặc định</span>
+                                    }
+                                </div>
+<p class="text-body-sm text-on-surface-variant mt-1">@address.Detail</p>
+<p class="text-body-sm text-on-surface-variant">@address.City</p>
+</div>
+</label>
+                        }
+                    </div>
+</section>
+<!-- Order Review Section -->
+<section class="bg-white rounded-xl p-lg shadow-black/5 shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20">
+<div class="flex items-center gap-sm mb-md text-primary">
+<span class="material-symbols-outlined" data-icon="package_2">package_2</span>
+<h2 class="font-headline-md text-headline-md">Sản Phẩm</h2>
+</div>
+<div class="overflow-x-auto">
+
+                                @foreach (var item in Model.CartItems) {
+                                
+                                }
+                            <table class="w-full text-left">
+<thead>
+<tr class="border-b border-outline-variant/30 text-on-surface-variant font-label-bold text-label-bold uppercase">
+<th class="pb-sm px-2">Sản phẩm</th>
+<th class="pb-sm px-2 text-center">Đơn giá</th>
+<th class="pb-sm px-2 text-center">Số lượng</th>
+<th class="pb-sm px-2 text-right">Thành tiền</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20"><tr>
+<td class="py-md px-2">
+<div class="flex items-center gap-md">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A premium high-tech smartphone featuring a sleek, minimalist design with a large edge-to-edge display. The device is captured in high-key studio lighting with soft shadows, resting on a clean white surface. The aesthetic is clean and modern, highlighting the vibrant blue accents of the interface. This image represents the pinnacle of contemporary gadget photography with a professional, airy atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMzRIj42nOoctpduuDD6mIUn6KKulhTowLKWg_kc4N_jxzkx1yLKcDWdiDggCU7Mm2URJJcIGycdLuGFic9qWEN63mNt4DsLW3BhZrV-6ny9BVoMQUyjeLbwFGoOKRe0uG8GUm_hrinBsmJiRUSUaWQ_IW6MW-mIv3ndkeuO15U_Eh25aniD8i82_qBTLQmKsf4oftad8WVXD69Gvhf-uSlkIo5jg1KR007OIWzleDdd7HpAXbXhyypid1qydASq_h3mzpV7cizM6Q"/>
+</div>
+<span class="font-body-base text-on-surface">@item.ProductName</span>
+</div>
+</td>
+<td class="py-md px-2 text-center font-body-base">₫@string.Format("{0:N0}", item.Price)</td>
+<td class="py-md px-2 text-center font-body-base">@item.Quantity</td>
+<td class="py-md px-2 text-right font-price-lg text-primary">₫@string.Format("{0:N0}", item.Price * item.Quantity)</td>
+</tr></tbody>
+</table>
+</div>
+</section>
+<!-- Payment Method Section -->
+<section class="bg-white rounded-xl p-lg shadow-black/5 shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20">
+<div class="flex items-center gap-sm mb-md text-primary">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<h2 class="font-headline-md text-headline-md">Phương Thức Thanh Toán</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<label class="flex items-center gap-md p-md border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary-fixed/10">
+<input checked="" class="text-primary focus:ring-primary h-5 w-5" name="paymentMethod" type="radio" value="COD"/>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant">local_shipping</span>
+<span class="font-body-base">Thanh toán khi nhận hàng (COD)</span>
+</div>
+</label>
+<label class="flex items-center gap-md p-md border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary-fixed/10">
+<input class="text-primary focus:ring-primary h-5 w-5" name="paymentMethod" type="radio" value="VNPay"/>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-sky-600">account_balance_wallet</span>
+<span class="font-body-base">VNPay (Thẻ ATM / QR Code)</span>
+</div>
+</label>
+</div>
+</section>
+</div>
+<!-- Right Column: Order Summary -->
+<aside class="w-full md:w-[380px]">
+<div class="sticky top-24 bg-white rounded-xl p-lg shadow-[0px_8px_24px_rgba(0,0,0,0.1)] border border-outline-variant/30 flex flex-col gap-lg">
+<h3 class="font-headline-md text-on-surface border-b border-outline-variant/20 pb-md">Tóm tắt đơn hàng</h3>
+<div class="space-y-md">
+<div class="flex justify-between text-on-surface-variant">
+<span class="font-body-base">Tổng tiền hàng</span>
+<span class="font-body-base">₫@string.Format("{0:N0}", Model.TotalAmount)</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span class="font-body-base">Phí vận chuyển</span>
+<span class="font-body-base">Miễn phí</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span class="font-body-base">Giảm giá</span>
+<span class="font-body-base">-₫0</span>
+</div>
+<div class="pt-md border-t border-dashed border-outline-variant flex justify-between items-end">
+<span class="font-label-bold text-on-surface">Tổng thanh toán</span>
+<span class="text-primary font-price-lg text-[32px]">₫@string.Format("{0:N0}", Model.TotalAmount)</span>
+</div>
+</div>
+<form asp-action="CreateOrder" asp-controller="Order" class="mt-md" method="post">
+                        @* Binding selections to hidden inputs via JavaScript or simple Razor names *@
+                        <input id="hiddenAddressId" name="AddressId" type="hidden" value="1"/>
+<input id="hiddenPayment" name="PaymentMethod" type="hidden" value="COD"/>
+<button class="w-full bg-primary-container text-white font-bold py-lg rounded-lg text-body-base shadow-lg shadow-primary-container/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 uppercase tracking-wide" type="submit">
+                            Đặt hàng
+                        </button>
+</form>
+<div class="flex items-center gap-sm justify-center text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-sm" data-icon="shield_check">shield</span>
+<span class="text-xs">Giao dịch được bảo mật bởi VibrantShop</span>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</cartitem></address>
+</body></html> *@

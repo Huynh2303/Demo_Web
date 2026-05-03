@@ -1,4 +1,5 @@
-﻿using Demo_web_MVC.Models.ViewModel.Oder;
+﻿using Demo_web_MVC.Models;
+using Demo_web_MVC.Models.ViewModel.Oder;
 
 namespace Demo_web_MVC.Service.Oder
 {
@@ -6,5 +7,12 @@ namespace Demo_web_MVC.Service.Oder
     {
         Task<OderViewModel?> GetOrderDetailAsyncService( int userId, int orderId);
         Task<int> CreateOrderFromCartAsyncService(int userId, string paymentMethod);
+        
+        //Task<Order> GetOrderByIdAsyncService(int orderId);
+        
+        Task<List<OderViewModel>> GetOrdersByUserAsyncService(int userId);
+        Task<bool> UpdateOrderStatusAsyncService(int orderId, string status);
+        Task<bool> CancelOrderAsyncService(int orderId, int userId);
+        //Task<decimal> CalculateOrderTotalAsyncService(int userId);
     }
 }
